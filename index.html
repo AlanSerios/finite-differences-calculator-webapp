@@ -39,22 +39,22 @@
     
     <style>
         :root {
-            --bg-color: #F0F4F8;
-            --card-bg: #FFFFFF;
-            --text-primary: #102A43;
-            --text-secondary: #334E68;
-            --border-color: #D9E2EC;
-            --accent-color: #3EBD93;
+            --bg-color: #F8FAFC;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --text-primary: #1E293B;
+            --text-secondary: #475569;
+            --border-color: rgba(226, 232, 240, 0.6);
+            --accent-color: #10B981;
             --inverted-text: #FFFFFF;
         }
         .dark {
-            --bg-color: #0F172A;
-            --card-bg: #1E293B;
-            --text-primary: #E2E8F0;
+            --bg-color: #020617;
+            --card-bg: rgba(15, 23, 42, 0.7);
+            --text-primary: #F8FAFC;
             --text-secondary: #94A3B8;
-            --border-color: #334155;
-            --accent-color: #3EBD93;
-            --inverted-text: #0F172A;
+            --border-color: rgba(30, 41, 59, 0.5);
+            --accent-color: #10B981;
+            --inverted-text: #020617;
         }
         body {
             background-color: var(--bg-color);
@@ -63,13 +63,47 @@
             color: var(--text-primary);
             transition: background-color 0.3s, color 0.3s;
         }
-        .bg-theme-card { transition: background-color 0.3s, border-color 0.3s; }
+        .bg-theme-card { 
+            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s; 
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.5);
+            border-left: 1px solid rgba(255, 255, 255, 0.5);
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+        }
+        .dark .bg-theme-card {
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid transparent;
+            border-right: 1px solid transparent;
+        }
         .text-theme-textP { transition: color 0.3s; }
         .text-theme-textS { transition: color 0.3s; }
+
+        .interactive-btn {
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .interactive-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 10px 25px -5px rgba(62, 189, 147, 0.4);
+        }
+        .interactive-btn:active {
+            transform: translateY(2px) scale(0.95);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
+        }
+        .animate-float { animation: float 7s ease-in-out infinite; }
+        .animate-float-delayed { animation: float 9s ease-in-out infinite 3s; }
         
         input:focus, button:focus, details:focus {
             outline: none;
-            box-shadow: 0 0 0 3px rgba(62, 189, 147, 0.5);
+            box-shadow: 0 0 0 3px rgba(62, 189, 147, 0.3);
         }
         
         /* Spinner CSS */
@@ -101,15 +135,15 @@
 
     <header class="bg-theme-card/90 backdrop-blur-md py-4 px-6 md:px-10 shadow-sm sticky top-0 z-50 border-b border-theme-border flex justify-between items-center transition-colors">
         <div class="flex items-center gap-4 md:gap-8">
-            <h1 class="text-lg md:text-3xl font-black italic text-theme-textP tracking-wide uppercase truncate">Finite Differences</h1>
+            <h1 class="text-lg md:text-3xl font-black italic text-theme-textP tracking-wide uppercase py-1">Finite Differences</h1>
             <nav class="hidden lg:flex gap-6">
-                <a href="#main-content" class="text-theme-textS hover:text-theme-accent font-bold uppercase text-sm transition-colors">Calculator</a>
-                <a href="#results-region" class="text-theme-textS hover:text-theme-accent font-bold uppercase text-sm transition-colors">Results</a>
-                <a href="#explanation-section" class="text-theme-textS hover:text-theme-accent font-bold uppercase text-sm transition-colors">Theory</a>
-                <a href="#examples-section" class="text-theme-textS hover:text-theme-accent font-bold uppercase text-sm transition-colors">Examples</a>
+                <a href="#main-content" class="text-theme-textS hover:text-theme-textP font-medium uppercase text-sm transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-theme-accent after:transition-all after:duration-300 hover:after:w-full">Calculator</a>
+                <a href="#results-region" class="text-theme-textS hover:text-theme-textP font-medium uppercase text-sm transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-theme-accent after:transition-all after:duration-300 hover:after:w-full">Results</a>
+                <a href="#explanation-section" class="text-theme-textS hover:text-theme-textP font-medium uppercase text-sm transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-theme-accent after:transition-all after:duration-300 hover:after:w-full">Theory</a>
+                <a href="#examples-section" class="text-theme-textS hover:text-theme-textP font-medium uppercase text-sm transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-theme-accent after:transition-all after:duration-300 hover:after:w-full">Examples</a>
             </nav>
         </div>
-        <button id="darkModeToggle" aria-label="Toggle Dark Mode" class="p-2 rounded-full hover:bg-theme-border transition-colors">
+        <button id="darkModeToggle" aria-label="Toggle Dark Mode" class="p-2 rounded-full hover:bg-theme-border transition-all duration-300 interactive-btn hover:shadow-[0_0_15px_var(--accent-color)] active:-rotate-45">
             <!-- Sun icon for dark mode (to switch to light) / Moon icon for light mode (to switch to dark) -->
             <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-theme-textP" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
@@ -121,22 +155,22 @@
     </header>
 
     <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <section class="bg-theme-card rounded-[40px] p-10 md:p-16 mb-24 relative overflow-hidden flex flex-col lg:flex-row gap-12 shadow-xl border border-theme-border items-center">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-theme-accent/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
-            <div class="absolute bottom-0 left-0 w-80 h-80 bg-theme-textP/5 rounded-full blur-3xl -ml-20 -mb-20"></div>
+        <section class="bg-theme-card rounded-[40px] p-10 md:p-16 mb-24 relative overflow-hidden flex flex-col lg:flex-row gap-12 border items-center group">
             
             <div class="lg:w-1/2 flex flex-col justify-center relative z-10">
-                <h2 class="text-4xl md:text-6xl font-black uppercase text-theme-textP leading-[1.1] mb-6">
+                <h2 class="text-xl md:text-2xl font-medium uppercase text-theme-textS tracking-widest leading-relaxed mb-2">
                     Submit your given and we'll solve your
-                    <span class="block text-5xl md:text-7xl mt-2 text-theme-accent">Problems</span>
+                </h2>
+                <h2 class="text-6xl md:text-8xl font-black uppercase bg-gradient-to-r from-theme-accent to-emerald-400 bg-clip-text text-transparent leading-[1.1] mb-6 drop-shadow-sm">
+                    Problems
                 </h2>
                 <p class="text-sm md:text-base mb-8 max-w-lg leading-relaxed text-theme-textS font-medium">
                     The Finite Differences Calculator is a Numerical Methods Calculator used for calculating Finite Differences of any kind. It just needs your given values and it will automatically show you the solution and plot.
                 </p>
                 <div class="flex flex-wrap gap-2 md:gap-4">
-                    <div class="bg-theme-textP text-theme-inverted font-bold py-2 md:py-3 px-4 md:px-8 rounded-full shadow-md uppercase text-xs md:text-sm">Forward</div>
-                    <div class="bg-theme-textP text-theme-inverted font-bold py-2 md:py-3 px-4 md:px-8 rounded-full shadow-md uppercase text-xs md:text-sm">Central</div>
-                    <div class="bg-theme-textP text-theme-inverted font-bold py-2 md:py-3 px-4 md:px-8 rounded-full shadow-md uppercase text-xs md:text-sm">Backward</div>
+                    <div class="bg-theme-textP text-theme-inverted font-bold py-2 md:py-3 px-4 md:px-8 rounded-full shadow-md uppercase text-xs md:text-sm interactive-btn cursor-default">Forward</div>
+                    <div class="bg-theme-textP text-theme-inverted font-bold py-2 md:py-3 px-4 md:px-8 rounded-full shadow-md uppercase text-xs md:text-sm interactive-btn cursor-default">Central</div>
+                    <div class="bg-theme-textP text-theme-inverted font-bold py-2 md:py-3 px-4 md:px-8 rounded-full shadow-md uppercase text-xs md:text-sm interactive-btn cursor-default">Backward</div>
                 </div>
             </div>
             
@@ -144,32 +178,28 @@
                 <div class="bg-theme-bg/50 backdrop-blur-md border border-theme-border p-8 rounded-[32px] h-full flex flex-col justify-center shadow-inner">
                     
                     <form id="calcForm" class="space-y-5" method="POST" novalidate>
-                        <div class="flex flex-col">
-                            <div class="flex flex-col md:flex-row items-stretch md:items-center">
-                                <label for="x_value" class="w-full md:w-48 bg-theme-textP text-theme-inverted font-bold py-3 px-6 rounded-t-xl md:rounded-t-none md:rounded-l-full uppercase text-xs md:text-sm text-center">Given X Value</label>
-                                <input id="x_value" name="x_value" value="{{ inputs.get('x_value', '') }}" type="number" step="any" class="flex-1 bg-theme-card border-none py-3 px-6 rounded-b-xl md:rounded-b-none md:rounded-r-full text-theme-textP font-semibold transition-shadow text-center md:text-left" placeholder="e.g., 2.0" aria-label="Given X Value">
-                            </div>
+                        <div class="relative w-full">
+                            <input id="x_value" name="x_value" value="{{ inputs.get('x_value', '') }}" type="number" step="any" class="peer w-full bg-theme-card border border-theme-border pt-7 pb-3 px-6 rounded-2xl text-theme-textP font-semibold focus:ring-2 focus:ring-theme-accent focus:border-transparent outline-none transition-all shadow-inner" placeholder=" " aria-label="Given X Value">
+                            <label for="x_value" class="absolute left-6 top-5 -translate-y-3 text-[10px] font-bold uppercase tracking-wide text-theme-textS transition-all peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-sm peer-focus:-translate-y-3 peer-focus:text-[10px] peer-focus:text-theme-accent cursor-text pointer-events-none">Given X Value</label>
                         </div>
-                        <div class="flex flex-col">
-                            <div class="flex flex-col md:flex-row items-stretch md:items-center">
-                                <label for="h_value" class="w-full md:w-48 bg-theme-textP text-theme-inverted font-bold py-3 px-6 rounded-t-xl md:rounded-t-none md:rounded-l-full uppercase text-xs md:text-sm text-center">Given H Value</label>
-                                <input id="h_value" name="h_value" value="{{ inputs.get('h_value', '0.1') }}" type="number" step="any" class="flex-1 bg-theme-card border-none py-3 px-6 rounded-b-xl md:rounded-b-none md:rounded-r-full text-theme-textP font-semibold transition-shadow text-center md:text-left" placeholder="e.g., 0.1" aria-label="Given H Value">
-                            </div>
+                        
+                        <div class="relative w-full">
+                            <input id="h_value" name="h_value" value="{{ inputs.get('h_value', '0.1') }}" type="number" step="any" class="peer w-full bg-theme-card border border-theme-border pt-7 pb-3 px-6 rounded-2xl text-theme-textP font-semibold focus:ring-2 focus:ring-theme-accent focus:border-transparent outline-none transition-all shadow-inner" placeholder=" " aria-label="Given H Value">
+                            <label for="h_value" class="absolute left-6 top-5 -translate-y-3 text-[10px] font-bold uppercase tracking-wide text-theme-textS transition-all peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-sm peer-focus:-translate-y-3 peer-focus:text-[10px] peer-focus:text-theme-accent cursor-text pointer-events-none">Given H Value</label>
                         </div>
-                        <div class="flex flex-col">
-                            <div class="flex flex-col md:flex-row items-stretch md:items-center">
-                                <label for="function" class="w-full md:w-48 bg-theme-textP text-theme-inverted font-bold py-3 px-6 rounded-t-xl md:rounded-t-none md:rounded-l-full uppercase text-xs md:text-sm text-center">Function</label>
-                                <input id="function" name="function" value="{{ inputs.get('function', 'x**2') }}" type="text" class="flex-1 bg-theme-card border-none py-3 px-6 rounded-b-xl md:rounded-b-none md:rounded-r-full text-theme-textP font-semibold transition-shadow focus:ring-2 focus:ring-theme-accent text-center md:text-left" placeholder="e.g., x**2" aria-label="Function">
-                            </div>
+
+                        <div class="relative w-full">
+                            <input id="function" name="function" value="{{ inputs.get('function', 'x**2') }}" type="text" class="peer w-full bg-theme-card border border-theme-border pt-7 pb-3 px-6 rounded-2xl text-theme-textP font-semibold focus:ring-2 focus:ring-theme-accent focus:border-transparent outline-none transition-all shadow-inner" placeholder=" " aria-label="Function">
+                            <label for="function" class="absolute left-6 top-5 -translate-y-3 text-[10px] font-bold uppercase tracking-wide text-theme-textS transition-all peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-sm peer-focus:-translate-y-3 peer-focus:text-[10px] peer-focus:text-theme-accent cursor-text pointer-events-none">Function</label>
                             
                             <!-- MathJax Preview Box -->
-                            <div class="mt-8 ml-0 md:ml-48 relative">
+                            <div class="mt-4 w-full relative">
                                 <div id="mathPreview" class="px-6 py-2 text-theme-textP min-h-[50px] flex items-center justify-center bg-theme-bg rounded-2xl border border-theme-border shadow-inner overflow-hidden text-lg"></div>
                                 <div class="absolute -top-2.5 left-4 bg-theme-card px-2 text-[10px] font-bold text-theme-textS uppercase tracking-wider rounded-full">Preview</div>
                             </div>
                         </div>
                         
-                        <button id="submitBtn" type="submit" class="w-full bg-theme-accent hover:bg-[#32A881] text-white font-bold py-4 rounded-full shadow-lg transition-colors uppercase mt-6 text-sm tracking-wider flex items-center justify-center gap-2">
+                        <button id="submitBtn" type="submit" class="w-full bg-theme-accent hover:bg-[#32A881] text-white font-bold py-4 rounded-full transition-colors uppercase mt-6 text-sm tracking-wider flex items-center justify-center gap-2 interactive-btn">
                             <span id="btnText">Calculate Finite Difference</span>
                             <span id="btnSpinner" class="spinner hidden"></span>
                         </button>
@@ -184,46 +214,47 @@
             <h2 class="text-6xl font-black italic text-theme-textP mb-10 lowercase drop-shadow-sm text-center">results</h2>
             
             {% if results.success %}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
-                <div class="lg:col-span-1 flex flex-col gap-6">
-                    <div class="bg-theme-card rounded-[40px] p-6 md:p-10 flex flex-col items-center justify-center flex-1 shadow-lg border border-theme-border">
-                        <h3 class="text-3xl font-bold italic text-theme-textP text-center uppercase leading-tight mb-6">Simple Calculation<br>Results</h3>
-                        
-                        <div class="w-full space-y-3 font-semibold text-theme-textS mb-4">
-                            <div class="bg-theme-textP text-theme-inverted p-4 rounded-2xl flex justify-between items-center shadow-inner">
-                                <span>Exact Answer:</span> <span class="font-black text-lg">{{ results.exact_derivative }}</span>
-                            </div>
-                            <div class="bg-theme-bg p-4 rounded-2xl flex justify-between items-center text-theme-textP">
-                                <span>Forward:</span> <span class="text-theme-accent font-black text-lg">{{ results.forward }}</span>
-                            </div>
-                            <div class="bg-theme-bg p-4 rounded-2xl flex justify-between items-center text-theme-textP">
-                                <span>Central:</span> <span class="text-theme-accent font-black text-lg">{{ results.central }}</span>
-                            </div>
-                            <div class="bg-theme-bg p-4 rounded-2xl flex justify-between items-center text-theme-textP">
-                                <span>Backward:</span> <span class="text-theme-accent font-black text-lg">{{ results.backward }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button onclick="downloadCSV('{{ results.exact_derivative }}', '{{ results.forward }}', '{{ results.backward }}', '{{ results.central }}')" class="w-full bg-theme-textS hover:bg-theme-textP text-theme-inverted font-bold py-5 rounded-[30px] shadow-lg transition-transform hover:-translate-y-1 uppercase text-sm tracking-wider flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                        Export Results (CSV)
-                    </button>
-                </div>
-                
-                <div class="lg:col-span-2 bg-theme-card rounded-[40px] overflow-hidden flex flex-col min-h-[400px] shadow-lg border border-theme-border">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+                <!-- Graph Card (Spans 4 columns) -->
+                <div class="lg:col-span-4 bg-theme-card rounded-[40px] overflow-hidden flex flex-col min-h-[400px] border border-theme-border order-1">
                     <div class="flex-1 p-6 bg-theme-bg w-full relative">
-                        <button id="resetZoomBtn" type="button" class="absolute top-8 right-8 bg-theme-card/90 backdrop-blur-sm text-theme-textP px-4 py-2 rounded-full text-xs font-bold border border-theme-border shadow-sm hover:bg-theme-bg transition-colors z-10 flex items-center gap-2">
+                        <button id="resetZoomBtn" type="button" class="absolute top-8 right-8 bg-theme-card/90 backdrop-blur-sm text-theme-textP px-4 py-2 rounded-full text-xs font-bold border border-theme-border shadow-sm hover:bg-theme-bg transition-colors z-10 flex items-center gap-2 interactive-btn">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                             Reset View
                         </button>
                         <canvas id="functionPlot" class="w-full h-full max-h-[350px]" aria-label="Accuracy Plot Graph" role="img"></canvas>
                     </div>
+                    <div class="bg-theme-textP py-4 px-8 mt-auto flex justify-between items-center">
+                        <span class="text-theme-inverted text-sm font-medium">Graphing: f(x) = {{ inputs.function }}</span>
+                        <h3 class="text-xl font-bold italic text-theme-inverted text-right uppercase">Accuracy Plot</h3>
+                    </div>
+                </div>
+
+                <!-- Simple Results Card (Spans 1 col) -->
+                <div class="lg:col-span-1 bg-theme-card rounded-[40px] p-6 flex flex-col items-center justify-center flex-1 border border-theme-border order-2">
+                    <h3 class="text-2xl font-bold italic text-theme-textP text-center uppercase leading-tight mb-6">Simple<br>Results</h3>
                     
-                    <!-- Graph Interactive Controls -->
-                    <div class="bg-theme-card border-t border-theme-border p-6 flex flex-col md:flex-row gap-6 items-center">
-                        <div class="flex-1 w-full flex flex-col gap-2">
+                    <div class="w-full space-y-2 font-semibold text-theme-textS mb-4 text-xs md:text-sm">
+                        <div class="bg-theme-textP text-theme-inverted p-3 rounded-2xl flex justify-between items-center shadow-inner">
+                            <span>Exact:</span> <span class="font-black">{{ results.exact_derivative }}</span>
+                        </div>
+                        <div class="bg-theme-bg p-3 rounded-2xl flex justify-between items-center text-theme-textP">
+                            <span>Forward:</span> <span class="text-theme-accent font-black">{{ results.forward }}</span>
+                        </div>
+                        <div class="bg-theme-bg p-3 rounded-2xl flex justify-between items-center text-theme-textP">
+                            <span>Central:</span> <span class="text-theme-accent font-black">{{ results.central }}</span>
+                        </div>
+                        <div class="bg-theme-bg p-3 rounded-2xl flex justify-between items-center text-theme-textP">
+                            <span>Backward:</span> <span class="text-theme-accent font-black">{{ results.backward }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Graph Controls Card (Spans 2 cols) -->
+                <div class="lg:col-span-2 bg-theme-card rounded-[40px] p-6 md:p-8 border border-theme-border flex flex-col justify-center order-3">
+                    <h3 class="text-lg font-bold italic text-theme-textP uppercase mb-4 text-center">Interactive Graph Controls</h3>
+                    <div class="flex flex-col gap-6 w-full">
+                        <div class="flex flex-col gap-2">
                             <div class="flex justify-between items-center text-xs font-bold text-theme-textS uppercase tracking-wider">
                                 <span>Target X Value</span>
                                 <span class="bg-theme-bg px-2 py-1 rounded" id="x_slider_val">{{ inputs.get('x_value', '0') }}</span>
@@ -234,7 +265,7 @@
                                 <span class="text-xs font-bold text-theme-textS">10</span>
                             </div>
                         </div>
-                        <div class="flex-1 w-full flex flex-col gap-2">
+                        <div class="flex flex-col gap-2">
                             <div class="flex justify-between items-center text-xs font-bold text-theme-textS uppercase tracking-wider">
                                 <span>Step Size (H)</span>
                                 <span class="bg-theme-bg px-2 py-1 rounded" id="h_slider_val">{{ inputs.get('h_value', '0.1') }}</span>
@@ -246,11 +277,14 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="bg-theme-textP py-4 px-8 mt-auto flex justify-between items-center">
-                        <span class="text-theme-inverted text-sm font-medium">Graphing: f(x) = {{ inputs.function }}</span>
-                        <h3 class="text-xl font-bold italic text-theme-inverted text-right uppercase">Accuracy Plot</h3>
-                    </div>
+                <!-- Export Results Card (Spans 1 col) -->
+                <div class="lg:col-span-1 flex flex-col order-4">
+                    <button onclick="downloadCSV('{{ results.exact_derivative }}', '{{ results.forward }}', '{{ results.backward }}', '{{ results.central }}')" class="h-full w-full bg-theme-card border border-theme-border hover:bg-theme-textP text-theme-textP hover:text-theme-inverted font-bold py-6 px-4 rounded-[40px] uppercase text-sm tracking-wider flex flex-col items-center justify-center gap-4 interactive-btn group transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-theme-accent group-hover:text-theme-inverted transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        <span>Export CSV</span>
+                    </button>
                 </div>
             </div>
 
@@ -664,16 +698,15 @@
             </script>
         </section>
     <!-- History Drawer Toggle Button -->
-    <button id="historyToggleBtn" class="fixed right-0 top-1/2 -translate-y-1/2 bg-theme-accent text-white py-4 px-2 rounded-l-xl shadow-lg z-50 hover:bg-theme-textP transition-colors font-bold flex flex-col items-center gap-2 print:hidden">
-        <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        <span style="writing-mode: vertical-rl; text-orientation: mixed;">History</span>
+    <button id="historyToggleBtn" class="fixed right-6 top-1/2 -translate-y-1/2 w-14 h-14 bg-theme-card/80 backdrop-blur-md text-theme-textP rounded-full shadow-lg border border-theme-border z-50 hover:text-theme-accent hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-300 flex items-center justify-center print:hidden interactive-btn group" aria-label="History">
+        <svg class="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
     </button>
 
     <!-- History Drawer -->
     <div id="historyDrawer" class="fixed top-0 right-0 h-full w-80 max-w-full bg-theme-card/95 backdrop-blur-xl shadow-2xl z-[60] transform translate-x-full transition-transform duration-300 border-l border-theme-border flex flex-col print:hidden">
         <div class="p-6 border-b border-theme-border flex justify-between items-center">
             <h2 class="text-xl font-black italic text-theme-textP uppercase">Recent</h2>
-            <button id="closeHistoryBtn" class="text-theme-textS hover:text-red-500 transition-colors">
+            <button id="closeHistoryBtn" class="text-theme-textS hover:text-red-500 transition-colors interactive-btn">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
