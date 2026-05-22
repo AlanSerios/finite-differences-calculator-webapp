@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Finite Differences Calculator</title>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        theme: {
+                            bg: 'var(--bg-color)',
+                            card: 'var(--card-bg)',
+                            textP: 'var(--text-primary)',
+                            textS: 'var(--text-secondary)',
+                            border: 'var(--border-color)',
+                            accent: 'var(--accent-color)',
+                            inverted: 'var(--inverted-text)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        :root {
+            --bg-color: #F0F4F8;
+            --card-bg: #FFFFFF;
+            --text-primary: #102A43;
+            --text-secondary: #334E68;
+            --border-color: #D9E2EC;
+            --accent-color: #3EBD93;
+            --inverted-text: #FFFFFF;
+        }
+        .dark {
+            --bg-color: #0F172A;
+            --card-bg: #1E293B;
+            --text-primary: #E2E8F0;
+            --text-secondary: #94A3B8;
+            --border-color: #334155;
+            --accent-color: #3EBD93;
+            --inverted-text: #0F172A;
+        }
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .bg-theme-card { transition: background-color 0.3s, border-color 0.3s; }
+        .text-theme-textP { transition: color 0.3s; }
+        .text-theme-textS { transition: color 0.3s; }
+        
+        input:focus, button:focus, details:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(62, 189, 147, 0.5);
+        }
+        
+        /* Spinner CSS */
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media print {
+            header, form, #darkModeToggle, button { display: none !important; }
+            details, details > div { display: block !important; }
+            body { background: white !important; color: black !important; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .shadow-lg, .shadow-xl, .shadow-md { box-shadow: none !important; border: 1px solid #ccc !important; }
+            canvas { max-height: 400px !important; }
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:p-4 focus:bg-theme-card focus:text-theme-textP focus:z-50">Skip to content</a>
+
+    <header class="bg-theme-card/90 backdrop-blur-md py-4 px-6 md:px-10 shadow-sm sticky top-0 z-50 border-b border-theme-border flex justify-between items-center transition-colors">
+        <div class="flex items-center gap-4 md:gap-8">
+            <h1 class="text-lg md:text-3xl font-black italic text-theme-textP tracking-wide uppercase truncate">Finite Differences</h1>
+            <nav class="hidden lg:flex gap-6">
+                <a href="#main-content" class="text-theme-textS hover:text-theme-accent font-bold uppercase text-sm transition-colors">Calculator</a>
+                <a href="#results-region" class="text-theme-textS hover:text-theme-accent font-bold uppercase text-sm transition-colors">Results</a>
+                <a href="#explanation-section" class="text-theme-textS hover:text-theme-accent font-bold uppercase text-sm transition-colors">Theory</a>
+                <a href="#examples-section" class="text-theme-textS hover:text-theme-accent font-bold uppercase text-sm transition-colors">Examples</a>
+            </nav>
+        </div>
+        <button id="darkModeToggle" aria-label="Toggle Dark Mode" class="p-2 rounded-full hover:bg-theme-border transition-colors">
+            <!-- Sun icon for dark mode (to switch to light) / Moon icon for light mode (to switch to dark) -->
+            <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-theme-textP" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+            <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-theme-textP hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+        </button>
+    </header>
+
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <section class="bg-theme-card rounded-[40px] p-10 md:p-16 mb-24 relative overflow-hidden flex flex-col lg:flex-row gap-12 shadow-xl border border-theme-border items-center">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-theme-accent/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+            <div class="absolute bottom-0 left-0 w-80 h-80 bg-theme-textP/5 rounded-full blur-3xl -ml-20 -mb-20"></div>
+            
+            <div class="lg:w-1/2 flex flex-col justify-center relative z-10">
+                <h2 class="text-4xl md:text-6xl font-black uppercase text-theme-textP leading-[1.1] mb-6">
+                    Submit your given and we'll solve your
+                    <span class="block text-5xl md:text-7xl mt-2 text-theme-accent">Problems</span>
+                </h2>
+                <p class="text-sm md:text-base mb-8 max-w-lg leading-relaxed text-theme-textS font-medium">
+                    The Finite Differences Calculator is a Numerical Methods Calculator used for calculating Finite Differences of any kind. It just needs your given values and it will automatically show you the solution and plot.
+                </p>
+                <div class="flex flex-wrap gap-2 md:gap-4">
+                    <div class="bg-theme-textP text-theme-inverted font-bold py-2 md:py-3 px-4 md:px-8 rounded-full shadow-md uppercase text-xs md:text-sm">Forward</div>
+                    <div class="bg-theme-textP text-theme-inverted font-bold py-2 md:py-3 px-4 md:px-8 rounded-full shadow-md uppercase text-xs md:text-sm">Central</div>
+                    <div class="bg-theme-textP text-theme-inverted font-bold py-2 md:py-3 px-4 md:px-8 rounded-full shadow-md uppercase text-xs md:text-sm">Backward</div>
+                </div>
+            </div>
+            
+            <div class="lg:w-1/2 relative z-10">
+                <div class="bg-theme-bg/50 backdrop-blur-md border border-theme-border p-8 rounded-[32px] h-full flex flex-col justify-center shadow-inner">
+                    
+                    <form id="calcForm" class="space-y-5" method="POST" novalidate>
+                        <div class="flex flex-col">
+                            <div class="flex flex-col md:flex-row items-stretch md:items-center">
+                                <label for="x_value" class="w-full md:w-48 bg-theme-textP text-theme-inverted font-bold py-3 px-6 rounded-t-xl md:rounded-t-none md:rounded-l-full uppercase text-xs md:text-sm text-center">Given X Value</label>
+                                <input id="x_value" name="x_value" value="{{ inputs.get('x_value', '') }}" type="number" step="any" class="flex-1 bg-theme-card border-none py-3 px-6 rounded-b-xl md:rounded-b-none md:rounded-r-full text-theme-textP font-semibold transition-shadow text-center md:text-left" placeholder="e.g., 2.0" aria-label="Given X Value">
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <div class="flex flex-col md:flex-row items-stretch md:items-center">
+                                <label for="h_value" class="w-full md:w-48 bg-theme-textP text-theme-inverted font-bold py-3 px-6 rounded-t-xl md:rounded-t-none md:rounded-l-full uppercase text-xs md:text-sm text-center">Given H Value</label>
+                                <input id="h_value" name="h_value" value="{{ inputs.get('h_value', '0.1') }}" type="number" step="any" class="flex-1 bg-theme-card border-none py-3 px-6 rounded-b-xl md:rounded-b-none md:rounded-r-full text-theme-textP font-semibold transition-shadow text-center md:text-left" placeholder="e.g., 0.1" aria-label="Given H Value">
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <div class="flex flex-col md:flex-row items-stretch md:items-center">
+                                <label for="function" class="w-full md:w-48 bg-theme-textP text-theme-inverted font-bold py-3 px-6 rounded-t-xl md:rounded-t-none md:rounded-l-full uppercase text-xs md:text-sm text-center">Function</label>
+                                <input id="function" name="function" value="{{ inputs.get('function', 'x**2') }}" type="text" class="flex-1 bg-theme-card border-none py-3 px-6 rounded-b-xl md:rounded-b-none md:rounded-r-full text-theme-textP font-semibold transition-shadow focus:ring-2 focus:ring-theme-accent text-center md:text-left" placeholder="e.g., x**2" aria-label="Function">
+                            </div>
+                            
+                            <!-- MathJax Preview Box -->
+                            <div class="mt-8 ml-0 md:ml-48 relative">
+                                <div id="mathPreview" class="px-6 py-2 text-theme-textP min-h-[50px] flex items-center justify-center bg-theme-bg rounded-2xl border border-theme-border shadow-inner overflow-hidden text-lg"></div>
+                                <div class="absolute -top-2.5 left-4 bg-theme-card px-2 text-[10px] font-bold text-theme-textS uppercase tracking-wider rounded-full">Preview</div>
+                            </div>
+                        </div>
+                        
+                        <button id="submitBtn" type="submit" class="w-full bg-theme-accent hover:bg-[#32A881] text-white font-bold py-4 rounded-full shadow-lg transition-colors uppercase mt-6 text-sm tracking-wider flex items-center justify-center gap-2">
+                            <span id="btnText">Calculate Finite Difference</span>
+                            <span id="btnSpinner" class="spinner hidden"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <div aria-live="polite" id="results-region">
+        {% if results %}
+        <section class="mb-32 animate-[fadeIn_0.5s_ease-in-out]" id="results-section">
+            <h2 class="text-6xl font-black italic text-theme-textP mb-10 lowercase drop-shadow-sm text-center">results</h2>
+            
+            {% if results.success %}
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="lg:col-span-1 flex flex-col gap-6">
+                    <div class="bg-theme-card rounded-[40px] p-6 md:p-10 flex flex-col items-center justify-center flex-1 shadow-lg border border-theme-border">
+                        <h3 class="text-3xl font-bold italic text-theme-textP text-center uppercase leading-tight mb-6">Simple Calculation<br>Results</h3>
+                        
+                        <div class="w-full space-y-3 font-semibold text-theme-textS mb-4">
+                            <div class="bg-theme-textP text-theme-inverted p-4 rounded-2xl flex justify-between items-center shadow-inner">
+                                <span>Exact Answer:</span> <span class="font-black text-lg">{{ results.exact_derivative }}</span>
+                            </div>
+                            <div class="bg-theme-bg p-4 rounded-2xl flex justify-between items-center text-theme-textP">
+                                <span>Forward:</span> <span class="text-theme-accent font-black text-lg">{{ results.forward }}</span>
+                            </div>
+                            <div class="bg-theme-bg p-4 rounded-2xl flex justify-between items-center text-theme-textP">
+                                <span>Central:</span> <span class="text-theme-accent font-black text-lg">{{ results.central }}</span>
+                            </div>
+                            <div class="bg-theme-bg p-4 rounded-2xl flex justify-between items-center text-theme-textP">
+                                <span>Backward:</span> <span class="text-theme-accent font-black text-lg">{{ results.backward }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="downloadCSV('{{ results.exact_derivative }}', '{{ results.forward }}', '{{ results.backward }}', '{{ results.central }}')" class="w-full bg-theme-textS hover:bg-theme-textP text-theme-inverted font-bold py-5 rounded-[30px] shadow-lg transition-transform hover:-translate-y-1 uppercase text-sm tracking-wider flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        Export Results (CSV)
+                    </button>
+                </div>
+                
+                <div class="lg:col-span-2 bg-theme-card rounded-[40px] overflow-hidden flex flex-col min-h-[400px] shadow-lg border border-theme-border">
+                    <div class="flex-1 p-6 bg-theme-bg w-full relative">
+                        <button id="resetZoomBtn" type="button" class="absolute top-8 right-8 bg-theme-card/90 backdrop-blur-sm text-theme-textP px-4 py-2 rounded-full text-xs font-bold border border-theme-border shadow-sm hover:bg-theme-bg transition-colors z-10 flex items-center gap-2">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            Reset View
+                        </button>
+                        <canvas id="functionPlot" class="w-full h-full max-h-[350px]" aria-label="Accuracy Plot Graph" role="img"></canvas>
+                    </div>
+                    
+                    <!-- Graph Interactive Controls -->
+                    <div class="bg-theme-card border-t border-theme-border p-6 flex flex-col md:flex-row gap-6 items-center">
+                        <div class="flex-1 w-full flex flex-col gap-2">
+                            <div class="flex justify-between items-center text-xs font-bold text-theme-textS uppercase tracking-wider">
+                                <span>Target X Value</span>
+                                <span class="bg-theme-bg px-2 py-1 rounded" id="x_slider_val">{{ inputs.get('x_value', '0') }}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-bold text-theme-textS">-10</span>
+                                <input type="range" id="x_slider" min="-10.0" max="10.0" step="0.001" value="{{ inputs.get('x_value', '0') }}" class="flex-1 h-2 bg-theme-border rounded-lg appearance-none cursor-pointer accent-[#3EBD93]">
+                                <span class="text-xs font-bold text-theme-textS">10</span>
+                            </div>
+                        </div>
+                        <div class="flex-1 w-full flex flex-col gap-2">
+                            <div class="flex justify-between items-center text-xs font-bold text-theme-textS uppercase tracking-wider">
+                                <span>Step Size (H)</span>
+                                <span class="bg-theme-bg px-2 py-1 rounded" id="h_slider_val">{{ inputs.get('h_value', '0.1') }}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-bold text-theme-textS">0.001</span>
+                                <input type="range" id="h_slider" min="0.001" max="2.0" step="0.001" value="{{ inputs.get('h_value', '0.1') }}" class="flex-1 h-2 bg-theme-border rounded-lg appearance-none cursor-pointer accent-theme-accent">
+                                <span class="text-xs font-bold text-theme-textS">2.0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-theme-textP py-4 px-8 mt-auto flex justify-between items-center">
+                        <span class="text-theme-inverted text-sm font-medium">Graphing: f(x) = {{ inputs.function }}</span>
+                        <h3 class="text-xl font-bold italic text-theme-inverted text-right uppercase">Accuracy Plot</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Analysis Table -->
+            <div class="mt-12 bg-theme-card rounded-[40px] p-10 shadow-lg border border-theme-border scroll-animate opacity-0 translate-y-10 transition-all duration-1000 ease-out">
+                <h3 class="text-3xl font-bold italic text-theme-textP text-center uppercase leading-tight mb-8">Error Analysis</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-theme-bg text-theme-textP border-b-2 border-theme-border">
+                                <th class="py-4 px-6 font-bold uppercase tracking-wider">Method</th>
+                                <th class="py-4 px-6 font-bold uppercase tracking-wider">Value</th>
+                                <th class="py-4 px-6 font-bold uppercase tracking-wider">Absolute Error</th>
+                                <th class="py-4 px-6 font-bold uppercase tracking-wider">Relative Error (%)</th>
+                                <th class="py-4 px-6 font-bold uppercase tracking-wider">Accuracy Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-theme-textS">
+                            {% for method in ['forward', 'central', 'backward'] %}
+                            <tr class="border-b border-theme-border hover:bg-theme-bg/50 transition-colors">
+                                <td class="py-4 px-6 font-bold capitalize text-theme-textP">{{ method }}</td>
+                                <td class="py-4 px-6 font-semibold">{{ results[method] }}</td>
+                                <td class="py-4 px-6">{{ results.errors[method ~ '_abs'] }}</td>
+                                <td class="py-4 px-6">
+                                    {% if results.errors[method ~ '_rel'] is not none %}
+                                        {{ results.errors[method ~ '_rel'] }}%
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td class="py-4 px-6 font-bold">
+                                    {% if results.errors[method ~ '_rel'] is not none %}
+                                        {% if results.errors[method ~ '_rel'] < 1 %}
+                                            <span class="text-green-500 bg-green-100/20 px-3 py-1 rounded-full">High</span>
+                                        {% elif results.errors[method ~ '_rel'] <= 5 %}
+                                            <span class="text-yellow-500 bg-yellow-100/20 px-3 py-1 rounded-full">Moderate</span>
+                                        {% else %}
+                                            <span class="text-red-500 bg-red-100/20 px-3 py-1 rounded-full">Low</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-theme-textS">N/A</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Step-by-Step Solution -->
+            <div class="mt-12 scroll-animate opacity-0 translate-y-10 transition-all duration-1000 ease-out">
+                <details class="bg-theme-card rounded-[40px] shadow-lg border border-theme-border group open:bg-theme-bg/30 transition-all duration-300">
+                    <summary class="cursor-pointer p-8 list-none flex justify-between items-center focus-visible:ring-4 focus-visible:ring-theme-accent focus-visible:outline-none rounded-[40px]">
+                        <h3 class="text-3xl font-bold italic text-theme-textP uppercase">Show Step-by-Step Solution</h3>
+                        <span class="transition group-open:rotate-180">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-theme-textP" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                        </span>
+                    </summary>
+                    <div class="p-10 pt-0 text-theme-textP border-t border-theme-border">
+                        <div class="space-y-8 mt-8">
+                            
+                            <div class="bg-theme-card border border-theme-border p-6 rounded-3xl shadow-sm relative pl-16">
+                                <div class="absolute top-6 left-4 w-8 h-8 rounded-full bg-theme-accent text-white flex items-center justify-center font-bold">1</div>
+                                <h4 class="text-xl font-bold mb-4 uppercase">Given Values</h4>
+                                <ul class="list-disc ml-6 space-y-2 text-theme-textS font-medium">
+                                    <li id="step-x-li">\( x = {{ results.steps.x_plus_h - results.steps.h }} \)</li>
+                                    <li id="step-h-li">\( h = {{ results.steps.h }} \)</li>
+                                    <li id="step-func-li">\( f(x) = {{ results.steps.function_str }} \)</li>
+                                </ul>
+                            </div>
+
+                            <div class="bg-theme-card border border-theme-border p-6 rounded-3xl shadow-sm relative pl-16">
+                                <div class="absolute top-6 left-4 w-8 h-8 rounded-full bg-theme-accent text-white flex items-center justify-center font-bold">2</div>
+                                <h4 class="text-xl font-bold mb-4 uppercase">Computed Data Points</h4>
+                                <ul class="list-disc ml-6 space-y-2 text-theme-textS font-medium">
+                                    <li id="step-target-li">Target Point: \( f({{ results.steps.x_plus_h - results.steps.h }}) = {{ results.steps.fx }} \)</li>
+                                    <li id="step-ahead-li">Step Ahead: \( f({{ results.steps.x_plus_h }}) = {{ results.steps.fx_plus_h }} \)</li>
+                                    <li id="step-behind-li">Step Behind: \( f({{ results.steps.x_minus_h }}) = {{ results.steps.fx_minus_h }} \)</li>
+                                </ul>
+                            </div>
+
+                            <div class="bg-theme-card border border-theme-border p-6 rounded-3xl shadow-sm relative pl-16">
+                                <div class="absolute top-6 left-4 w-8 h-8 rounded-full bg-theme-accent text-white flex items-center justify-center font-bold">3</div>
+                                <h4 class="text-xl font-bold mb-4 uppercase">Formula Substitution</h4>
+                                <div class="space-y-4">
+                                    <div class="bg-theme-bg p-4 rounded-xl border border-theme-border overflow-x-auto">
+                                        <p class="font-bold text-theme-textP mb-2">Forward Difference</p>
+                                        <p class="text-lg min-w-max">\( \frac{f(x+h) - f(x)}{h} \)</p>
+                                        <p class="text-lg mt-2 min-w-max" id="step-fwd-form">\( {{ results.steps.forward_formula }} \)</p>
+                                        <p class="text-3xl font-black text-theme-accent mt-4" id="step-fwd-ans">{{ results.forward }}</p>
+                                    </div>
+                                    <div class="bg-theme-bg p-4 rounded-xl border border-theme-border overflow-x-auto">
+                                        <p class="font-bold text-theme-textP mb-2">Central Difference</p>
+                                        <p class="text-lg min-w-max">\( \frac{f(x+h) - f(x-h)}{2h} \)</p>
+                                        <p class="text-lg mt-2 min-w-max" id="step-cen-form">\( {{ results.steps.central_formula }} \)</p>
+                                        <p class="text-3xl font-black text-theme-accent mt-4" id="step-cen-ans">{{ results.central }}</p>
+                                    </div>
+                                    <div class="bg-theme-bg p-4 rounded-xl border border-theme-border overflow-x-auto">
+                                        <p class="font-bold text-theme-textP mb-2">Backward Difference</p>
+                                        <p class="text-lg min-w-max">\( \frac{f(x) - f(x-h)}{h} \)</p>
+                                        <p class="text-lg mt-2 min-w-max" id="step-bwd-form">\( {{ results.steps.backward_formula }} \)</p>
+                                        <p class="text-3xl font-black text-theme-accent mt-4" id="step-bwd-ans">{{ results.backward }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-theme-card border border-theme-border p-6 rounded-3xl shadow-sm relative pl-16">
+                                <div class="absolute top-6 left-4 w-8 h-8 rounded-full bg-theme-accent text-white flex items-center justify-center font-bold">4</div>
+                                <h4 class="text-xl font-bold mb-4 uppercase">Final Answers</h4>
+                                <ul class="list-none space-y-2 text-theme-textP font-bold text-lg">
+                                    <li id="step-final-fwd">Forward: \( {{ results.forward }} \)</li>
+                                    <li id="step-final-cen">Central: \( {{ results.central }} \)</li>
+                                    <li id="step-final-bwd">Backward: \( {{ results.backward }} \)</li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <script>
+                // CSV Download Logic
+                function downloadCSV(exact, forward, backward, central) {
+                    const csvContent = "data:text/csv;charset=utf-8,Method,Calculated Value\nExact Analytical," + exact + "\nForward Difference," + forward + "\nBackward Difference," + backward + "\nCentral Difference," + central;
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", "finite_differences.csv");
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+
+                // Chart.js Initialization
+                document.addEventListener("DOMContentLoaded", function() {
+                    const canvas = document.getElementById('functionPlot');
+                    if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        const labels = {{ results.graph_data.x_points | tojson | safe }};
+                        const targetX = {{ results.graph_data.target_x }};
+                        const targetY = {{ results.graph_data.target_y }};
+                        const isDark = document.documentElement.classList.contains('dark');
+                        const gridColor = isDark ? '#334155' : '#D9E2EC';
+                        const textColor = isDark ? '#E2E8F0' : '#102A43';
+
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                {
+                                    label: 'Original Function f(x)',
+                                    data: {{ results.graph_data.y_fx | tojson | safe }},
+                                    borderColor: textColor,
+                                    borderWidth: 4,
+                                    tension: 0.4,
+                                    pointRadius: 0
+                                },
+                                {
+                                    label: 'Actual Derivative (True Tangent)',
+                                    data: {{ results.graph_data.y_tangent | tojson | safe }},
+                                    borderColor: '#3EBD93',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    pointRadius: 0
+                                },
+                                {
+                                    label: 'Finite Difference (Secant Line)',
+                                    data: {{ results.graph_data.y_secant | tojson | safe }},
+                                    borderColor: '#E11D48',
+                                    borderWidth: 2,
+                                    borderDash: [2, 2],
+                                    pointRadius: 0
+                                },
+                                {
+                                    label: 'Target Point (x)',
+                                    data: labels.map(lbl => lbl === targetX ? targetY : null),
+                                    backgroundColor: textColor,
+                                    borderColor: textColor,
+                                    pointRadius: 6,
+                                    pointHoverRadius: 8
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { 
+                                    zoom: {
+                                        pan: { enabled: true, mode: 'xy' },
+                                        zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'xy' }
+                                    },
+                                    legend: { 
+                                        display: true,
+                                        position: 'bottom',
+                                        labels: { usePointStyle: true, padding: 20, font: { family: 'Inter', weight: 'bold' }, color: textColor }
+                                    },
+                                    tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + context.parsed.y.toFixed(4); } } }
+                                },
+                                scales: { 
+                                    x: { grid: { color: gridColor }, ticks: { color: textColor } }, 
+                                    y: { grid: { color: gridColor }, ticks: { color: textColor } } 
+                                }
+                            }
+                        });
+                        
+                        document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            </script>
+            {% else %}
+            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-[40px] p-10 text-center font-bold text-xl shadow-lg" role="alert">
+                Calculation Error: {{ results.error }}. Please check your function syntax.
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
+        </div>
+
+        <section id="explanation-section" class="mb-32 text-center scroll-animate opacity-0 translate-y-10 transition-all duration-1000 ease-out">
+            <h2 class="text-6xl font-black italic text-theme-textP mb-6 lowercase drop-shadow-sm">what are finite differences?</h2>
+            <p class="text-lg max-w-4xl mx-auto mb-16 text-theme-textS font-medium">
+                Finite Differences is a simple math trick used to estimate a derivative (slope) when you don't have a calculus formula. Instead of complex calculus, it uses basic arithmetic to find the rate of change between nearby data points.
+            </p>
+            
+            <div class="inline-block border-4 border-theme-accent bg-theme-card rounded-[40px] py-4 px-12 mb-16 shadow-md">
+                <h3 class="text-4xl font-black italic text-theme-accent uppercase">There are 4 simple steps</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto text-left">
+                <div class="border border-theme-border shadow-md rounded-[40px] p-10 relative bg-theme-card transition-transform hover:-translate-y-1">
+                    <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full border-4 border-theme-accent bg-theme-card flex items-center justify-center text-3xl font-black italic text-theme-accent">1</div>
+                    <h4 class="text-3xl font-black italic text-theme-textP text-center mt-6 mb-6 lowercase">identify givens</h4>
+                    <ul class="space-y-2 text-sm md:text-base font-semibold text-theme-textS">
+                        <li><span class="font-bold italic text-theme-textP">x</span> = The target point where you want the slope.</li>
+                        <li><span class="font-bold italic text-theme-textP">h</span> = The step size (distance between data points).</li>
+                        <li><span class="font-bold italic text-theme-textP">method</span> = forward, backward, or central</li>
+                    </ul>
+                </div>
+                
+                <div class="border border-theme-border shadow-md rounded-[40px] p-10 relative bg-theme-card transition-transform hover:-translate-y-1">
+                    <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full border-4 border-theme-accent bg-theme-card flex items-center justify-center text-3xl font-black italic text-theme-accent">2</div>
+                    <h4 class="text-3xl font-black italic text-theme-textP text-center mt-6 mb-6 lowercase">collect data</h4>
+                    <ul class="space-y-3 text-base md:text-lg font-bold text-theme-textS">
+                        <li><span class="italic text-theme-textP">f(x)</span> - Target Point</li>
+                        <li><span class="italic text-theme-textP">f(x + h)</span> - One Step Ahead</li>
+                        <li><span class="italic text-theme-textP">f(x - h)</span> - One Step Behind</li>
+                    </ul>
+                </div>
+                
+                <div class="border border-theme-border shadow-md rounded-[40px] p-10 relative bg-theme-card transition-transform hover:-translate-y-1">
+                    <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full border-4 border-theme-accent bg-theme-card flex items-center justify-center text-3xl font-black italic text-theme-accent">3</div>
+                    <h4 class="text-3xl font-black italic text-theme-textP text-center mt-6 mb-8 lowercase">pick your formula</h4>
+                    <div class="space-y-6 text-theme-textS">
+                        <div class="flex items-center justify-between border-b border-theme-border pb-2">
+                            <span class="font-bold italic text-lg text-theme-textP">Forward:</span>
+                            <div class="text-xl">$$ \frac{f(x+h) - f(x)}{h} $$</div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-theme-border pb-2">
+                            <span class="font-bold italic text-lg text-theme-textP">Backward:</span>
+                            <div class="text-xl">$$ \frac{f(x) - f(x-h)}{h} $$</div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold italic text-lg text-theme-textP">Central:</span>
+                            <div class="text-xl">$$ \frac{f(x+h) - f(x-h)}{2h} $$</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border border-theme-border shadow-md rounded-[40px] p-10 relative bg-theme-textP flex items-center justify-center transition-transform hover:-translate-y-1">
+                    <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full border-4 border-theme-accent bg-theme-card flex items-center justify-center text-3xl font-black italic text-theme-accent">4</div>
+                    <h4 class="text-5xl font-black italic text-theme-accent text-center uppercase drop-shadow-md">Calculate!!!</h4>
+                </div>
+            </div>
+        </section>
+
+        <section id="examples-section" class="mb-32 scroll-animate opacity-0 translate-y-10 transition-all duration-1000 ease-out">
+            <h2 class="text-6xl font-black italic text-theme-textP mb-12 lowercase drop-shadow-sm text-center">examples</h2>
+            
+            <div class="mb-16 bg-theme-card p-8 rounded-[40px] shadow-lg border border-theme-border">
+                <div class="flex flex-wrap gap-2 mb-8 border border-theme-border rounded-full p-2 max-w-fit mx-auto lg:mx-0 bg-theme-bg shadow-sm">
+                    <div class="bg-theme-textP text-theme-inverted text-xs font-bold py-2 px-6 rounded-full uppercase shadow-sm">Forward</div>
+                    <div class="bg-theme-textP text-theme-inverted text-xs font-bold py-2 px-6 rounded-full uppercase shadow-sm">Central</div>
+                    <div class="bg-theme-textP text-theme-inverted text-xs font-bold py-2 px-6 rounded-full uppercase shadow-sm">Backward</div>
+                    <div class="flex items-center ml-2 bg-theme-accent rounded-full overflow-hidden shadow-sm">
+                        <div class="text-white text-xs font-bold py-2 px-4 uppercase">X Value</div>
+                        <div class="bg-theme-card text-theme-textP text-xs py-2 px-4 font-semibold border-l border-theme-border">2.0</div>
+                    </div>
+                    <div class="flex items-center ml-2 bg-theme-accent rounded-full overflow-hidden shadow-sm">
+                        <div class="text-white text-xs font-bold py-2 px-4 uppercase">H Value</div>
+                        <div class="bg-theme-card text-theme-textP text-xs py-2 px-4 font-semibold border-l border-theme-border">0.1</div>
+                    </div>
+                    <div class="flex items-center ml-2 bg-theme-accent rounded-full overflow-hidden shadow-sm">
+                        <div class="text-white text-xs font-bold py-2 px-4 uppercase">Func</div>
+                        <div class="bg-theme-card text-theme-textP text-xs py-2 px-4 font-semibold border-l border-theme-border">x**2</div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1 bg-theme-bg rounded-[32px] p-10 flex flex-col items-center justify-center min-h-[300px] border border-theme-border">
+                        <h3 class="text-2xl font-bold italic text-theme-textP text-center uppercase leading-tight mb-6">Simple Calculation<br>Results</h3>
+                        <div class="w-full text-theme-textS font-semibold space-y-2">
+                            <div class="flex justify-between border-b border-theme-border pb-2"><span>Exact Tangent:</span> <span class="text-theme-textP">4.000000</span></div>
+                            <div class="flex justify-between border-b border-theme-border pb-2"><span>Forward:</span> <span class="text-theme-textP">4.100000</span></div>
+                            <div class="flex justify-between border-b border-theme-border pb-2"><span>Central:</span> <span class="text-theme-textP">4.000000</span></div>
+                            <div class="flex justify-between"><span>Backward:</span> <span class="text-theme-textP">3.900000</span></div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 bg-theme-bg rounded-[32px] overflow-hidden flex flex-col min-h-[300px] border border-theme-border relative">
+                        <div class="flex-1 p-6 relative">
+                            <canvas id="exampleChart1" class="w-full h-full max-h-[300px]"></canvas>
+                        </div>
+                        <div class="bg-theme-textP py-4 px-8 mt-auto">
+                            <h3 class="text-lg font-bold italic text-theme-inverted text-right uppercase">Polynomial Function Plot</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-theme-card p-8 rounded-[40px] shadow-lg border border-theme-border">
+                <div class="flex flex-wrap gap-2 mb-8 border border-theme-border rounded-full p-2 max-w-fit mx-auto lg:mx-0 bg-theme-bg shadow-sm">
+                    <div class="bg-theme-textP text-theme-inverted text-xs font-bold py-2 px-6 rounded-full uppercase shadow-sm">Forward</div>
+                    <div class="bg-theme-textP text-theme-inverted text-xs font-bold py-2 px-6 rounded-full uppercase shadow-sm">Central</div>
+                    <div class="bg-theme-textP text-theme-inverted text-xs font-bold py-2 px-6 rounded-full uppercase shadow-sm">Backward</div>
+                    <div class="flex items-center ml-2 bg-theme-accent rounded-full overflow-hidden shadow-sm">
+                        <div class="text-white text-xs font-bold py-2 px-4 uppercase">X Value</div>
+                        <div class="bg-theme-card text-theme-textP text-xs py-2 px-4 font-semibold border-l border-theme-border">0.0</div>
+                    </div>
+                    <div class="flex items-center ml-2 bg-theme-accent rounded-full overflow-hidden shadow-sm">
+                        <div class="text-white text-xs font-bold py-2 px-4 uppercase">H Value</div>
+                        <div class="bg-theme-card text-theme-textP text-xs py-2 px-4 font-semibold border-l border-theme-border">0.1</div>
+                    </div>
+                    <div class="flex items-center ml-2 bg-theme-accent rounded-full overflow-hidden shadow-sm">
+                        <div class="text-white text-xs font-bold py-2 px-4 uppercase">Func</div>
+                        <div class="bg-theme-card text-theme-textP text-xs py-2 px-4 font-semibold border-l border-theme-border">sin(x)</div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1 bg-theme-bg rounded-[32px] p-10 flex flex-col items-center justify-center min-h-[300px] border border-theme-border">
+                        <h3 class="text-2xl font-bold italic text-theme-textP text-center uppercase leading-tight mb-6">Simple Calculation<br>Results</h3>
+                        <div class="w-full text-theme-textS font-semibold space-y-2">
+                            <div class="flex justify-between border-b border-theme-border pb-2"><span>Exact Tangent:</span> <span class="text-theme-textP">1.000000</span></div>
+                            <div class="flex justify-between border-b border-theme-border pb-2"><span>Forward:</span> <span class="text-theme-textP">0.998334</span></div>
+                            <div class="flex justify-between border-b border-theme-border pb-2"><span>Central:</span> <span class="text-theme-textP">0.998334</span></div>
+                            <div class="flex justify-between"><span>Backward:</span> <span class="text-theme-textP">0.998334</span></div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 bg-theme-bg rounded-[32px] overflow-hidden flex flex-col min-h-[300px] border border-theme-border relative">
+                        <div class="flex-1 p-6 relative">
+                            <canvas id="exampleChart2" class="w-full h-full max-h-[300px]"></canvas>
+                        </div>
+                        <div class="bg-theme-textP py-4 px-8 mt-auto">
+                            <h3 class="text-lg font-bold italic text-theme-inverted text-right uppercase">Trigonometric Function Plot</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const gridColor = isDark ? '#334155' : '#D9E2EC';
+                    const textColor = isDark ? '#E2E8F0' : '#102A43';
+
+                    const chartOptions = {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: true, position: 'bottom', labels: { usePointStyle: true, color: textColor, padding: 20, font: { family: 'Inter', weight: 'bold' } } } },
+                        scales: { 
+                            x: { grid: { color: gridColor }, ticks: { color: textColor } }, 
+                            y: { grid: { color: gridColor }, ticks: { color: textColor } } 
+                        }
+                    };
+
+                    const ctx1 = document.getElementById('exampleChart1');
+                    if (ctx1) {
+                        const xVals = Array.from({length: 21}, (_, i) => -2 + i * 0.4);
+                        new Chart(ctx1.getContext('2d'), {
+                            type: 'line',
+                            data: {
+                                labels: xVals.map(x => x.toFixed(1)),
+                                datasets: [
+                                    { label: 'f(x) = x²', data: xVals.map(x => x*x), borderColor: textColor, borderWidth: 3, pointRadius: 0 },
+                                    { label: 'True Tangent', data: xVals.map(x => 4*(x-2) + 4), borderColor: '#3EBD93', borderDash: [5,5], borderWidth: 2, pointRadius: 0 },
+                                    { label: 'Target x=2.0', data: xVals.map(x => x.toFixed(1) === '2.0' ? 4 : null), backgroundColor: textColor, borderColor: textColor, pointRadius: 6, pointHoverRadius: 8 }
+                                ]
+                            },
+                            options: chartOptions
+                        });
+                    }
+
+                    const ctx2 = document.getElementById('exampleChart2');
+                    if (ctx2) {
+                        const xVals2 = Array.from({length: 41}, (_, i) => -3.14 + i * 0.157);
+                        new Chart(ctx2.getContext('2d'), {
+                            type: 'line',
+                            data: {
+                                labels: xVals2.map(x => x.toFixed(1)),
+                                datasets: [
+                                    { label: 'f(x) = sin(x)', data: xVals2.map(x => Math.sin(x)), borderColor: textColor, borderWidth: 3, pointRadius: 0 },
+                                    { label: 'True Tangent', data: xVals2.map(x => Math.cos(0)*(x-0) + Math.sin(0)), borderColor: '#3EBD93', borderDash: [5,5], borderWidth: 2, pointRadius: 0 },
+                                    { label: 'Target x=0.0', data: xVals2.map(x => (Math.abs(x) < 0.1) ? 0 : null), backgroundColor: textColor, borderColor: textColor, pointRadius: 6, pointHoverRadius: 8 }
+                                ]
+                            },
+                            options: chartOptions
+                        });
+                    }
+                });
+            </script>
+        </section>
+    <!-- History Drawer Toggle Button -->
+    <button id="historyToggleBtn" class="fixed right-0 top-1/2 -translate-y-1/2 bg-theme-accent text-white py-4 px-2 rounded-l-xl shadow-lg z-50 hover:bg-theme-textP transition-colors font-bold flex flex-col items-center gap-2 print:hidden">
+        <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span style="writing-mode: vertical-rl; text-orientation: mixed;">History</span>
+    </button>
+
+    <!-- History Drawer -->
+    <div id="historyDrawer" class="fixed top-0 right-0 h-full w-80 max-w-full bg-theme-card/95 backdrop-blur-xl shadow-2xl z-[60] transform translate-x-full transition-transform duration-300 border-l border-theme-border flex flex-col print:hidden">
+        <div class="p-6 border-b border-theme-border flex justify-between items-center">
+            <h2 class="text-xl font-black italic text-theme-textP uppercase">Recent</h2>
+            <button id="closeHistoryBtn" class="text-theme-textS hover:text-red-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div id="historyContainer" class="p-6 flex-1 overflow-y-auto flex flex-col gap-4">
+            <p class="text-theme-textS text-sm italic text-center mt-10" id="emptyHistoryMsg">No calculations yet.</p>
+        </div>
+    </div>
+    
+    <!-- Backdrop for Drawer -->
+    <div id="historyBackdrop" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-[55] hidden transition-opacity opacity-0 print:hidden"></div>
+    
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-8 right-8 z-[100] flex flex-col items-end gap-3 pointer-events-none print:hidden"></div>
+    </main>
+
+    <footer class="bg-theme-card border-t border-theme-border py-8 mt-12 text-center text-theme-textS transition-colors">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="font-semibold mb-2">Finite Differences Calculator — Built for Numerical Methods</p>
+            <p class="text-sm">© 2026</p>
+        </div>
+    </footer>
+
+    <script>
+        // Toast Notification System
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            
+            const bg = type === 'error' ? 'bg-red-500' : 'bg-[#3EBD93]';
+            const icon = type === 'error' 
+                ? `<svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+                : `<svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+            
+            toast.className = `flex items-center gap-3 px-6 py-4 rounded-2xl shadow-xl transform translate-y-full opacity-0 transition-all duration-500 pointer-events-auto ${bg} text-white font-bold`;
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-full', 'opacity-0');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+
+        // Scroll Animation Observer
+        const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
+        const scrollObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('opacity-0', 'translate-y-10');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.scroll-animate').forEach(el => scrollObserver.observe(el));
+        });
+
+        // Form Validation & Loading State
+        document.getElementById('calcForm').addEventListener('submit', function(e) {
+            let valid = true;
+            
+            const xInput = document.getElementById('x_value');
+            const hInput = document.getElementById('h_value');
+            const funcInput = document.getElementById('function');
+            
+            if (!xInput.value || isNaN(parseFloat(xInput.value))) {
+                showToast("Please enter a valid number for X.", "error");
+                valid = false;
+            }
+            
+            if (!hInput.value || isNaN(parseFloat(hInput.value))) {
+                showToast("Please enter a valid number for H.", "error");
+                valid = false;
+            } else if (parseFloat(hInput.value) === 0) {
+                showToast("H value cannot be 0.", "error");
+                valid = false;
+            }
+            
+            if (!funcInput.value.trim()) {
+                showToast("Function cannot be empty.", "error");
+                valid = false;
+            }
+            
+            if (!valid) {
+                e.preventDefault();
+            } else {
+                // Show loading spinner
+                const btnText = document.getElementById('btnText');
+                const btnSpinner = document.getElementById('btnSpinner');
+                const submitBtn = document.getElementById('submitBtn');
+                
+                btnText.textContent = 'Calculating...';
+                btnSpinner.classList.remove('hidden');
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+            }
+        });
+
+        // Dark Mode Logic
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+        const htmlElement = document.documentElement;
+
+        // History & Preview Logic
+        const historyToggleBtn = document.getElementById('historyToggleBtn');
+        const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+        const historyDrawer = document.getElementById('historyDrawer');
+        const historyBackdrop = document.getElementById('historyBackdrop');
+        const historyContainer = document.getElementById('historyContainer');
+        const emptyHistoryMsg = document.getElementById('emptyHistoryMsg');
+
+        // Reset View Logic
+        const resetZoomBtn = document.getElementById('resetZoomBtn');
+        if (resetZoomBtn) {
+            resetZoomBtn.addEventListener('click', () => {
+                const chartCanvas = document.getElementById('functionPlot');
+                if (chartCanvas) {
+                    const chart = Chart.getChart(chartCanvas);
+                    if (chart) chart.resetZoom();
+                }
+            });
+        }
+
+        function toggleHistory() {
+            const isClosed = historyDrawer.classList.contains('translate-x-full');
+            if (isClosed) {
+                historyDrawer.classList.remove('translate-x-full');
+                historyBackdrop.classList.remove('hidden');
+                setTimeout(() => historyBackdrop.classList.remove('opacity-0'), 10);
+                renderHistory();
+            } else {
+                historyDrawer.classList.add('translate-x-full');
+                historyBackdrop.classList.add('opacity-0');
+                setTimeout(() => historyBackdrop.classList.add('hidden'), 300);
+            }
+        }
+        
+        if (historyToggleBtn) historyToggleBtn.addEventListener('click', toggleHistory);
+        if (closeHistoryBtn) closeHistoryBtn.addEventListener('click', toggleHistory);
+        if (historyBackdrop) historyBackdrop.addEventListener('click', toggleHistory);
+        
+        function saveToHistory(func, x, h, latex) {
+            let history = JSON.parse(localStorage.getItem('calcHistory') || '[]');
+            if (history.length > 0 && history[0].func === func && history[0].x === x && history[0].h === h) return;
+            
+            history.unshift({ func, x, h, latex, timestamp: new Date().toLocaleTimeString() });
+            if (history.length > 10) history.pop();
+            localStorage.setItem('calcHistory', JSON.stringify(history));
+            
+            // Show premium success notification
+            showToast("Calculations saved to History", "success");
+        }
+
+        function renderHistory() {
+            let history = JSON.parse(localStorage.getItem('calcHistory') || '[]');
+            if (history.length === 0) {
+                if(emptyHistoryMsg) emptyHistoryMsg.style.display = 'block';
+                return;
+            }
+            if(emptyHistoryMsg) emptyHistoryMsg.style.display = 'none';
+            
+            document.querySelectorAll('.history-card').forEach(c => c.remove());
+            
+            history.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "history-card bg-theme-bg p-4 rounded-xl border border-theme-border cursor-pointer hover:border-theme-accent hover:shadow-md transition-all group";
+                card.innerHTML = `
+                    <div class="text-xs text-theme-textS mb-1">${item.timestamp}</div>
+                    <div class="font-bold text-theme-textP text-lg mb-2 truncate">f(x) = ${item.func}</div>
+                    <div class="flex gap-2 text-xs font-semibold text-theme-textS">
+                        <span class="bg-theme-card px-2 py-1 rounded">X: ${item.x}</span>
+                        <span class="bg-theme-card px-2 py-1 rounded">H: ${item.h}</span>
+                    </div>
+                `;
+                card.addEventListener('click', () => {
+                    document.getElementById('function').value = item.func;
+                    document.getElementById('x_value').value = item.x;
+                    document.getElementById('h_value').value = item.h;
+                    document.getElementById('h_slider').value = item.h;
+                    toggleHistory();
+                    fetchNewResults();
+                });
+                historyContainer.appendChild(card);
+            });
+        }
+        
+        // Initial Fetch for MathJax Preview
+        window.addEventListener('load', fetchNewResults);
+
+        // Real-time Slider Logic
+        const hSlider = document.getElementById('h_slider');
+        const xSlider = document.getElementById('x_slider');
+        const hSliderVal = document.getElementById('h_slider_val');
+        const xSliderVal = document.getElementById('x_slider_val');
+        
+        const hInput = document.getElementById('h_value');
+        const xInput = document.getElementById('x_value');
+        const funcInput = document.getElementById('function');
+        let debounceTimer;
+
+        if (hSlider && hInput) {
+            hSlider.addEventListener('input', function() {
+                hInput.value = this.value;
+                if(hSliderVal) hSliderVal.textContent = this.value;
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(fetchNewResults, 50);
+            });
+            hInput.addEventListener('input', function() {
+                if (hSlider) { hSlider.value = this.value; }
+                if (hSliderVal) { hSliderVal.textContent = this.value; }
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(fetchNewResults, 300);
+            });
+        }
+        
+        if (xSlider && xInput) {
+            xSlider.addEventListener('input', function() {
+                xInput.value = this.value;
+                if(xSliderVal) xSliderVal.textContent = this.value;
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(fetchNewResults, 50);
+            });
+            xInput.addEventListener('input', function() {
+                if (xSlider) { xSlider.value = this.value; }
+                if (xSliderVal) { xSliderVal.textContent = this.value; }
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(fetchNewResults, 300);
+            });
+        }
+
+        funcInput.addEventListener('input', () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(fetchNewResults, 500); });
+
+        async function fetchNewResults() {
+            const x = xInput.value;
+            const h = hInput.value;
+            const func = funcInput.value;
+            
+            if (!x || isNaN(parseFloat(x)) || !h || isNaN(parseFloat(h)) || parseFloat(h) === 0 || !func.trim()) return;
+            
+            try {
+                const response = await fetch('/api/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ function: func, x_value: x, h_value: h })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    // Update MathJax Preview
+                    const mathPreview = document.getElementById('mathPreview');
+                    if (mathPreview && data.function_latex) {
+                        mathPreview.innerHTML = `$$f(x) = ${data.function_latex}$$`;
+                        if (window.MathJax) MathJax.typesetPromise([mathPreview]);
+                        saveToHistory(func, x, h, data.function_latex);
+                    }
+
+                    // Quick update of main chart
+                    const chartCanvas = document.getElementById('functionPlot');
+                    if (chartCanvas) {
+                        const chart = Chart.getChart(chartCanvas);
+                        if (chart) {
+                            chart.data.labels = data.graph_data.x_points;
+                            chart.data.datasets[0].data = data.graph_data.y_fx;
+                            chart.data.datasets[1].data = data.graph_data.y_tangent;
+                            chart.data.datasets[2].data = data.graph_data.y_secant;
+                            chart.data.datasets[3].data = data.graph_data.x_points.map(lbl => lbl === data.graph_data.target_x ? data.graph_data.target_y : null);
+                            chart.update('none'); // Snappy update
+                        }
+                    }
+                    
+                    // Quick update of basic results texts
+                    const exactAns = document.querySelector('.bg-theme-textP span.font-black');
+                    if (exactAns) exactAns.textContent = data.exact_derivative;
+
+                    const resultsAns = document.querySelectorAll('.bg-theme-bg span.text-theme-accent.font-black');
+                    if(resultsAns.length >= 3) {
+                        resultsAns[0].textContent = data.forward;
+                        resultsAns[1].textContent = data.central;
+                        resultsAns[2].textContent = data.backward;
+                    }
+                    
+                    // Dynamic Step-by-Step Updates
+                    if(document.getElementById('step-x-li') && data.steps) {
+                        
+                        document.getElementById('step-x-li').innerHTML = `\\( x = ${x} \\)`;
+                        document.getElementById('step-h-li').innerHTML = `\\( h = ${h} \\)`;
+                        document.getElementById('step-func-li').innerHTML = `\\( f(x) = ${func} \\)`;
+                        
+                        document.getElementById('step-target-li').innerHTML = `Target Point: \\( f(${x}) = ${data.steps.fx} \\)`;
+                        document.getElementById('step-ahead-li').innerHTML = `Step Ahead: \\( f(${data.steps.x_plus_h}) = ${data.steps.fx_plus_h} \\)`;
+                        document.getElementById('step-behind-li').innerHTML = `Step Behind: \\( f(${data.steps.x_minus_h}) = ${data.steps.fx_minus_h} \\)`;
+                        
+                        document.getElementById('step-fwd-ans').textContent = data.forward;
+                        document.getElementById('step-cen-ans').textContent = data.central;
+                        document.getElementById('step-bwd-ans').textContent = data.backward;
+                        
+                        document.getElementById('step-fwd-form').innerHTML = `\\( ${data.steps.forward_formula} \\)`;
+                        document.getElementById('step-cen-form').innerHTML = `\\( ${data.steps.central_formula} \\)`;
+                        document.getElementById('step-bwd-form').innerHTML = `\\( ${data.steps.backward_formula} \\)`;
+                        
+                        if (document.getElementById('step-final-fwd')) {
+                            document.getElementById('step-final-fwd').innerHTML = `Forward: \\( ${data.forward} \\)`;
+                            document.getElementById('step-final-cen').innerHTML = `Central: \\( ${data.central} \\)`;
+                            document.getElementById('step-final-bwd').innerHTML = `Backward: \\( ${data.backward} \\)`;
+                        }
+                        
+                        // Re-typeset the MathJax equations so the new values render properly
+                        if (window.MathJax) {
+                            const elementsToUpdate = [
+                                document.getElementById('step-x-li'),
+                                document.getElementById('step-h-li'),
+                                document.getElementById('step-func-li'),
+                                document.getElementById('step-target-li'),
+                                document.getElementById('step-ahead-li'),
+                                document.getElementById('step-behind-li'),
+                                document.getElementById('step-fwd-form'),
+                                document.getElementById('step-cen-form'),
+                                document.getElementById('step-bwd-form'),
+                                document.getElementById('step-final-fwd'),
+                                document.getElementById('step-final-cen'),
+                                document.getElementById('step-final-bwd')
+                            ].filter(el => el !== null);
+                            
+                            MathJax.typesetClear(elementsToUpdate);
+                            MathJax.typesetPromise(elementsToUpdate);
+                        }
+                    }
+                    
+                    // Update graph header text
+                    const graphTitle = document.querySelector('.bg-theme-textP span.text-theme-inverted.text-sm.font-medium');
+                    if (graphTitle) {
+                        graphTitle.textContent = 'Graphing: f(x) = ' + func;
+                    }
+                }
+            } catch (err) {
+                console.error("Fetch error:", err);
+            }
+        }
+
+        
+        // Check for saved preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlElement.classList.add('dark');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark');
+            const isDark = htmlElement.classList.contains('dark');
+            
+            // Update icons
+            if (isDark) {
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+                localStorage.setItem('theme', 'light');
+            }
+
+            // Update Chart grid colors if it exists
+            const chartsToUpdate = ['functionPlot', 'exampleChart1', 'exampleChart2'];
+            chartsToUpdate.forEach(id => {
+                const chartCanvas = document.getElementById(id);
+                if (chartCanvas) {
+                    const chart = Chart.getChart(chartCanvas);
+                    if (chart) {
+                        const gridColor = isDark ? '#334155' : '#D9E2EC';
+                        const textColor = isDark ? '#E2E8F0' : '#102A43';
+                        
+                        chart.options.scales.x.grid.color = gridColor;
+                        chart.options.scales.y.grid.color = gridColor;
+                        chart.options.scales.x.ticks.color = textColor;
+                        chart.options.scales.y.ticks.color = textColor;
+                        chart.options.plugins.legend.labels.color = textColor;
+                        
+                        // Update dataset colors
+                        chart.data.datasets[0].borderColor = textColor; // f(x)
+                        
+                        // the target point dataset is either index 3 (main chart) or index 2 (examples)
+                        const targetIndex = id === 'functionPlot' ? 3 : 2;
+                        if (chart.data.datasets.length > targetIndex) {
+                            chart.data.datasets[targetIndex].backgroundColor = textColor; 
+                            chart.data.datasets[targetIndex].borderColor = textColor; 
+                        }
+                        
+                        chart.update();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
