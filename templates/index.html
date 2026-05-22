@@ -56,6 +56,35 @@
             --accent-color: #10B981;
             --inverted-text: #020617;
         }
+        
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .dark {
+                --bg-color: white !important;
+                --text-primary: black !important;
+                --text-secondary: black !important;
+                --card-bg: transparent !important;
+                --border-color: #ccc !important;
+            }
+            nav, .hero-section, #calcForm, #historyToggleBtn, #darkModeToggle {
+                display: none !important;
+            }
+            .glass-card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+                backdrop-filter: none !important;
+            }
+            #resultsGrid {
+                display: block !important;
+            }
+            .chart-container {
+                page-break-inside: avoid;
+            }
+        }
+        
         body {
             background-color: var(--bg-color);
             background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
@@ -134,8 +163,8 @@
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:p-4 focus:bg-theme-card focus:text-theme-textP focus:z-50">Skip to content</a>
 
     <header class="bg-theme-card/90 backdrop-blur-md py-4 px-6 md:px-10 shadow-sm sticky top-0 z-50 border-b border-theme-border flex justify-between items-center transition-colors">
-        <div class="flex items-center gap-4 md:gap-8">
-            <h1 class="text-lg md:text-3xl font-black italic text-theme-textP tracking-wide uppercase py-1">Finite Differences</h1>
+        <div class="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-0">
+            <h1 class="text-base sm:text-lg md:text-3xl font-black italic text-theme-textP tracking-wide uppercase py-1 truncate">Finite Differences</h1>
             <nav class="hidden lg:flex gap-6">
                 <a href="#main-content" class="text-theme-textS hover:text-theme-textP font-medium uppercase text-sm transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-theme-accent after:transition-all after:duration-300 hover:after:w-full">Calculator</a>
                 <a href="#results-region" class="text-theme-textS hover:text-theme-textP font-medium uppercase text-sm transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-theme-accent after:transition-all after:duration-300 hover:after:w-full">Results</a>
@@ -154,14 +183,14 @@
         </button>
     </header>
 
-    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <section class="bg-theme-card rounded-[40px] p-10 md:p-16 mb-24 relative overflow-hidden flex flex-col lg:flex-row gap-12 border items-center group">
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <section class="bg-theme-card rounded-[40px] p-6 sm:p-10 md:p-16 mb-16 md:mb-24 relative overflow-hidden flex flex-col lg:flex-row gap-8 lg:gap-12 border items-center group">
             
             <div class="lg:w-1/2 flex flex-col justify-center relative z-10">
                 <h2 class="text-xl md:text-2xl font-medium uppercase text-theme-textS tracking-widest leading-relaxed mb-2">
                     Submit your given and we'll solve your
                 </h2>
-                <h2 class="text-6xl md:text-8xl font-black uppercase bg-gradient-to-r from-theme-accent to-emerald-400 bg-clip-text text-transparent leading-[1.1] mb-6 drop-shadow-sm">
+                <h2 class="text-5xl sm:text-6xl md:text-8xl font-black uppercase bg-gradient-to-r from-theme-accent to-emerald-400 bg-clip-text text-transparent leading-[1.1] mb-6 drop-shadow-sm">
                     Problems
                 </h2>
                 <p class="text-sm md:text-base mb-8 max-w-lg leading-relaxed text-theme-textS font-medium">
@@ -174,23 +203,23 @@
                 </div>
             </div>
             
-            <div class="lg:w-1/2 relative z-10">
-                <div class="bg-theme-bg/50 backdrop-blur-md border border-theme-border p-8 rounded-[32px] h-full flex flex-col justify-center shadow-inner">
+            <div class="lg:w-1/2 relative z-10 w-full">
+                <div class="bg-theme-bg/50 backdrop-blur-md border border-theme-border p-5 sm:p-8 rounded-[32px] h-full flex flex-col justify-center shadow-inner">
                     
-                    <form id="calcForm" class="space-y-5" method="POST" novalidate>
+                    <form id="calcForm" class="space-y-4 sm:space-y-5" method="POST" novalidate>
                         <div class="relative w-full">
-                            <input id="x_value" name="x_value" value="{{ inputs.get('x_value', '') }}" type="number" step="any" class="peer w-full bg-theme-card border border-theme-border pt-7 pb-3 px-6 rounded-2xl text-theme-textP font-semibold focus:ring-2 focus:ring-theme-accent focus:border-transparent outline-none transition-all shadow-inner" placeholder=" " aria-label="Given X Value">
-                            <label for="x_value" class="absolute left-6 top-5 -translate-y-3 text-[10px] font-bold uppercase tracking-wide text-theme-textS transition-all peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-sm peer-focus:-translate-y-3 peer-focus:text-[10px] peer-focus:text-theme-accent cursor-text pointer-events-none">Given X Value</label>
+                            <input id="x_value" name="x_value" value="{{ inputs.get('x_value', '') }}" type="number" step="any" class="peer w-full bg-theme-card border border-theme-border pt-7 pb-3 px-4 sm:px-6 rounded-2xl text-theme-textP font-semibold focus:ring-2 focus:ring-theme-accent focus:border-transparent outline-none transition-all shadow-inner" placeholder=" " aria-label="Given X Value">
+                            <label for="x_value" class="absolute left-4 sm:left-6 top-5 -translate-y-3 text-[10px] font-bold uppercase tracking-wide text-theme-textS transition-all peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-sm peer-focus:-translate-y-3 peer-focus:text-[10px] peer-focus:text-theme-accent cursor-text pointer-events-none">Given X Value</label>
                         </div>
                         
                         <div class="relative w-full">
-                            <input id="h_value" name="h_value" value="{{ inputs.get('h_value', '0.1') }}" type="number" step="any" class="peer w-full bg-theme-card border border-theme-border pt-7 pb-3 px-6 rounded-2xl text-theme-textP font-semibold focus:ring-2 focus:ring-theme-accent focus:border-transparent outline-none transition-all shadow-inner" placeholder=" " aria-label="Given H Value">
-                            <label for="h_value" class="absolute left-6 top-5 -translate-y-3 text-[10px] font-bold uppercase tracking-wide text-theme-textS transition-all peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-sm peer-focus:-translate-y-3 peer-focus:text-[10px] peer-focus:text-theme-accent cursor-text pointer-events-none">Given H Value</label>
+                            <input id="h_value" name="h_value" value="{{ inputs.get('h_value', '0.1') }}" type="number" step="any" class="peer w-full bg-theme-card border border-theme-border pt-7 pb-3 px-4 sm:px-6 rounded-2xl text-theme-textP font-semibold focus:ring-2 focus:ring-theme-accent focus:border-transparent outline-none transition-all shadow-inner" placeholder=" " aria-label="Given H Value">
+                            <label for="h_value" class="absolute left-4 sm:left-6 top-5 -translate-y-3 text-[10px] font-bold uppercase tracking-wide text-theme-textS transition-all peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-sm peer-focus:-translate-y-3 peer-focus:text-[10px] peer-focus:text-theme-accent cursor-text pointer-events-none">Given H Value</label>
                         </div>
 
                         <div class="relative w-full">
-                            <input id="function" name="function" value="{{ inputs.get('function', 'x**2') }}" type="text" class="peer w-full bg-theme-card border border-theme-border pt-7 pb-3 px-6 rounded-2xl text-theme-textP font-semibold focus:ring-2 focus:ring-theme-accent focus:border-transparent outline-none transition-all shadow-inner" placeholder=" " aria-label="Function">
-                            <label for="function" class="absolute left-6 top-5 -translate-y-3 text-[10px] font-bold uppercase tracking-wide text-theme-textS transition-all peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-sm peer-focus:-translate-y-3 peer-focus:text-[10px] peer-focus:text-theme-accent cursor-text pointer-events-none">Function</label>
+                            <input id="function" name="function" value="{{ inputs.get('function', 'x**2') }}" type="text" class="peer w-full bg-theme-card border border-theme-border pt-7 pb-3 px-4 sm:px-6 rounded-2xl text-theme-textP font-semibold focus:ring-2 focus:ring-theme-accent focus:border-transparent outline-none transition-all shadow-inner" placeholder=" " aria-label="Function">
+                            <label for="function" class="absolute left-4 sm:left-6 top-5 -translate-y-3 text-[10px] font-bold uppercase tracking-wide text-theme-textS transition-all peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-sm peer-focus:-translate-y-3 peer-focus:text-[10px] peer-focus:text-theme-accent cursor-text pointer-events-none">Function</label>
                             
                             <!-- MathJax Preview Box -->
                             <div class="mt-4 w-full relative">
@@ -210,11 +239,11 @@
 
         <div aria-live="polite" id="results-region">
         {% if results %}
-        <section class="mb-32 animate-[fadeIn_0.5s_ease-in-out]" id="results-section">
-            <h2 class="text-6xl font-black italic text-theme-textP mb-10 lowercase drop-shadow-sm text-center">results</h2>
+        <section class="mb-20 md:mb-32 animate-[fadeIn_0.5s_ease-in-out]" id="results-section">
+            <h2 class="text-5xl md:text-6xl font-black italic text-theme-textP mb-8 md:mb-10 lowercase drop-shadow-sm text-center">results</h2>
             
             {% if results.success %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 relative z-10">
                 <!-- Graph Card (Spans 4 columns) -->
                 <div class="lg:col-span-4 bg-theme-card rounded-[40px] overflow-hidden flex flex-col min-h-[400px] border border-theme-border order-1">
                     <div class="flex-1 p-6 bg-theme-bg w-full relative">
@@ -697,13 +726,19 @@
                 });
             </script>
         </section>
-    <!-- History Drawer Toggle Button -->
-    <button id="historyToggleBtn" class="fixed right-6 top-1/2 -translate-y-1/2 w-14 h-14 bg-theme-card/80 backdrop-blur-md text-theme-textP rounded-full shadow-lg border border-theme-border z-50 hover:text-theme-accent hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-300 flex items-center justify-center print:hidden interactive-btn group" aria-label="History">
-        <svg class="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-    </button>
 
-    <!-- History Drawer -->
-    <div id="historyDrawer" class="fixed top-0 right-0 h-full w-80 max-w-full bg-theme-card/95 backdrop-blur-xl shadow-2xl z-[60] transform translate-x-full transition-transform duration-300 border-l border-theme-border flex flex-col print:hidden">
+    <!-- History Drawer Toggle Button -->
+    <button id="historyToggleBtn" class="fixed right-4 md:right-6 bottom-4 md:bottom-6 z-40 bg-theme-textP text-theme-inverted p-4 md:p-5 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 hover:shadow-[0_0_20px_var(--accent-color)] group" aria-label="Open History">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-7 md:w-7 group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+    </button>
+    
+    <!-- Dark Backdrop for drawer -->
+    <div id="historyBackdrop" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
+
+    <!-- Right side drawer -->
+    <div id="historyDrawer" class="fixed right-0 top-0 bottom-0 w-full sm:w-96 bg-theme-bg/95 backdrop-blur-xl shadow-2xl z-50 transform translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col border-l border-theme-border">
         <div class="p-6 border-b border-theme-border flex justify-between items-center">
             <h2 class="text-xl font-black italic text-theme-textP uppercase">Recent</h2>
             <button id="closeHistoryBtn" class="text-theme-textS hover:text-red-500 transition-colors interactive-btn">
@@ -771,7 +806,6 @@
             document.querySelectorAll('.scroll-animate').forEach(el => scrollObserver.observe(el));
         });
 
-        // Form Validation & Loading State
         document.getElementById('calcForm').addEventListener('submit', function(e) {
             let valid = true;
             
@@ -800,15 +834,23 @@
             if (!valid) {
                 e.preventDefault();
             } else {
-                // Show loading spinner
+                e.preventDefault();
+                // Show sleek loading spinner and progress bar effect
                 const btnText = document.getElementById('btnText');
                 const btnSpinner = document.getElementById('btnSpinner');
                 const submitBtn = document.getElementById('submitBtn');
                 
-                btnText.textContent = 'Calculating...';
+                btnText.textContent = 'Crunching Derivatives...';
                 btnSpinner.classList.remove('hidden');
                 submitBtn.disabled = true;
-                submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+                
+                // Add a glowing pulse effect
+                submitBtn.classList.add('animate-pulse', 'shadow-[0_0_20px_rgba(16,185,129,0.8)]');
+                
+                // Artificial loading time to simulate heavy mathematical computation
+                setTimeout(() => {
+                    document.getElementById('calcForm').submit();
+                }, 1000);
             }
         });
 
@@ -890,12 +932,43 @@
                     </div>
                 `;
                 card.addEventListener('click', () => {
-                    document.getElementById('function').value = item.func;
-                    document.getElementById('x_value').value = item.x;
-                    document.getElementById('h_value').value = item.h;
-                    document.getElementById('h_slider').value = item.h;
                     toggleHistory();
-                    fetchNewResults();
+                    
+                    const funcInput = document.getElementById('function');
+                    const xInput = document.getElementById('x_value');
+                    const hInput = document.getElementById('h_value');
+                    const hSlider = document.getElementById('h_slider');
+                    
+                    // Clear inputs for typing effect
+                    funcInput.value = '';
+                    xInput.value = '';
+                    hInput.value = '';
+                    if(hSlider) hSlider.value = item.h;
+                    
+                    // Highlight the inputs slightly
+                    funcInput.classList.add('shadow-[0_0_15px_rgba(16,185,129,0.3)]');
+                    setTimeout(() => funcInput.classList.remove('shadow-[0_0_15px_rgba(16,185,129,0.3)]'), 1000);
+                    
+                    let i = 0;
+                    const typeInterval = setInterval(() => {
+                        if (i < item.func.length) {
+                            funcInput.value += item.func.charAt(i);
+                        }
+                        if (i < item.x.toString().length) {
+                            xInput.value += item.x.toString().charAt(i);
+                        }
+                        if (i < item.h.toString().length) {
+                            hInput.value += item.h.toString().charAt(i);
+                        }
+                        i++;
+                        
+                        if (i >= Math.max(item.func.length, item.x.toString().length, item.h.toString().length)) {
+                            clearInterval(typeInterval);
+                            // Trigger the calculate form submission with our animation
+                            const submitBtn = document.getElementById('submitBtn');
+                            if(submitBtn) submitBtn.click();
+                        }
+                    }, 50); // 50ms per keystroke
                 });
                 historyContainer.appendChild(card);
             });
