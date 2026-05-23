@@ -564,11 +564,13 @@
 
                 <!-- Export Results Card (Spans 1 col) -->
                 <div class="lg:col-span-1 bg-theme-card w-full h-full reveal-hidden" data-reveal style="transition-delay: 300ms;">
-                    <div class="card-inner h-full overflow-hidden">
-                        <button onclick="downloadCSV('{{ results.exact_derivative }}', '{{ results.forward }}', '{{ results.backward }}', '{{ results.central }}')" class="w-full h-full min-h-[250px] bg-theme-bg hover:bg-theme-textP text-theme-textP hover:text-theme-inverted p-8 uppercase text-xs font-bold tracking-[0.2em] flex flex-col items-center justify-center gap-6 magnetic-btn group transition-colors">
-                            <div class="w-16 h-16 rounded-full border border-theme-border group-hover:border-theme-inverted/20 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-theme-accent group-hover:text-theme-inverted transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                            </div>
+                    <div class="card-inner h-full overflow-hidden flex flex-col min-h-[250px]">
+                        <button onclick="downloadGraphImage()" class="flex-1 w-full bg-theme-textP text-theme-inverted hover:bg-theme-accent p-6 uppercase text-xs font-bold tracking-[0.2em] flex flex-col items-center justify-center gap-4 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            <span>Export Graph Image</span>
+                        </button>
+                        <button onclick="downloadCSV('{{ inputs.function }}', '{{ inputs.x_value }}', '{{ inputs.h_value }}', '{{ results.exact_derivative }}', '{{ results.forward }}', '{{ results.backward }}', '{{ results.central }}', '{{ results.steps.forward_formula }}', '{{ results.steps.backward_formula }}', '{{ results.steps.central_formula }}')" class="flex-1 w-full bg-theme-bg text-theme-textP hover:bg-theme-textS p-6 border-t border-theme-border uppercase text-xs font-bold tracking-[0.2em] flex flex-col items-center justify-center gap-4 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                             <span>Export CSV</span>
                         </button>
                     </div>
@@ -737,17 +739,7 @@
             </div>
 
             <script>
-                // CSV Download Logic
-                function downloadCSV(exact, forward, backward, central) {
-                    const csvContent = "data:text/csv;charset=utf-8,Method,Calculated Value\nExact Analytical," + exact + "\nForward Difference," + forward + "\nBackward Difference," + backward + "\nCentral Difference," + central;
-                    const encodedUri = encodeURI(csvContent);
-                    const link = document.createElement("a");
-                    link.setAttribute("href", encodedUri);
-                    link.setAttribute("download", "finite_differences.csv");
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }
+
 
                 // Desmos Initialization
                 document.addEventListener("DOMContentLoaded", function() {
@@ -762,7 +754,7 @@
                             invertedColors: isDark,
                             border: false
                         });
-                        });
+                        
                         const calc = window.mainCalc;
                         calc.setExpression({ id: 'f', latex: `y = {{ results.function_latex | safe }}`, color: '#000000' });
                         calc.setExpression({ id: 'target', latex: `({{ results.graph_data.target_x }}, {{ results.graph_data.target_y }})`, color: getDesmosColor('#10B981', isDark), showLabel: true });
@@ -1381,6 +1373,53 @@
                 console.error("Preview error:", err);
             }
         }
+
+        // Graph Image Download Logic
+        window.downloadGraphImage = function() {
+            if (window.mainCalc) {
+                const graphImageSrc = window.mainCalc.screenshot({
+                    width: 1200,
+                    height: 800,
+                    targetPixelRatio: 2
+                });
+                const link = document.createElement("a");
+                link.setAttribute("href", graphImageSrc);
+                link.setAttribute("download", "finite_differences_graph.png");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert("The graph is not available yet.");
+            }
+        };
+
+        // CSV Download Logic
+        window.downloadCSV = function(func, x_val, h_val, exact, forward, backward, central, fwd_form, bwd_form, cen_form) {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            // Header information
+            csvContent += "GIVEN PARAMETERS\n";
+            csvContent += `Function,f(x) = ${func}\n`;
+            csvContent += `Target Point (x),${x_val}\n`;
+            csvContent += `Step Size (h),${h_val}\n\n`;
+            // Step-by-Step Solutions
+            csvContent += "STEP-BY-STEP SUBSTITUTIONS\n";
+            csvContent += `Forward Difference,"${fwd_form} = ${forward}"\n`;
+            csvContent += `Backward Difference,"${bwd_form} = ${backward}"\n`;
+            csvContent += `Central Difference,"${cen_form} = ${central}"\n\n`;
+            // Results table
+            csvContent += "METHOD,CALCULATED VALUE\n";
+            csvContent += `Exact Analytical,${exact}\n`;
+            csvContent += `Forward Difference,${forward}\n`;
+            csvContent += `Backward Difference,${backward}\n`;
+            csvContent += `Central Difference,${central}\n`;
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "finite_differences.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
 
         async function fetchNewResults() {
             const xInput = document.getElementById('x_value');
