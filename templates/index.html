@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
     <title>Finite Differences Calculator</title>
     
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -193,82 +193,143 @@
             color: var(--text-primary);
         }
 
-        /* ─── TOUCH TARGETS ─────────────────────────────────── */
-        button, input, select, a {
+        /* ─── AUTHORITATIVE MOBILE STANDARDS (Apple HIG / M3 / WCAG) ─── */
+        /* Source: Apple HIG 44pt min, Material Design 3 48dp min, WCAG 2.5.5 44px */
+
+        /* Remove tap flash on all interactive elements */
+        button, input, select, a, summary {
             -webkit-tap-highlight-color: transparent;
         }
-        input[type="number"], input[type="text"] {
-            min-height: 56px;
-            font-size: 1rem; /* Prevents iOS zoom-in on focus */
+
+        /* CRITICAL: font-size >= 16px on ALL inputs — prevents iOS Safari zoom */
+        input[type="number"],
+        input[type="text"],
+        input[type="email"],
+        select,
+        textarea {
+            font-size: 1rem !important; /* 16px — NEVER below this on mobile */
+            min-height: 48px; /* Material Design 3 minimum / Apple HIG 44pt */
         }
 
-        /* ─── CLAMP TYPOGRAPHY ──────────────────────────────── */
+        /* CRITICAL: All tappable elements must meet 44×44px minimum */
+        button, [role="button"] {
+            min-height: 44px;
+        }
+
+        /* ─── CLAMP TYPOGRAPHY (fluid, no breakpoint jumps) ─── */
         .hero-headline {
-            font-size: clamp(2.5rem, 8vw, 6rem);
+            font-size: clamp(2rem, 7.5vw, 6rem);
             line-height: 1.05;
             letter-spacing: -0.02em;
         }
         .section-heading {
-            font-size: clamp(2rem, 6vw, 3.75rem);
+            font-size: clamp(1.875rem, 6vw, 3.75rem);
         }
 
-        /* ─── NO HORIZONTAL OVERFLOW ────────────────────────── */
-        html, body { overflow-x: hidden; max-width: 100vw; }
+        /* ─── PREVENT HORIZONTAL SCROLL ─── */
+        html { overflow-x: clip; }
+        body { overflow-x: clip; }
 
-        /* Error table → mobile stacked cards */
+        /* ─── SAFE AREA INSETS (iPhone notch / Dynamic Island / home bar) ─── */
+        /* Pattern: additive — base padding + safe area */
+        body {
+            padding-top: env(safe-area-inset-top, 0px);
+        }
+        .sticky-header {
+            /* Header: use max() so it's at least 1rem even with no notch */
+            top: max(1rem, calc(env(safe-area-inset-top) + 0.5rem));
+            position: relative; /* needed for absolute-centered logo child */
+        }
+        .safe-bottom {
+            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+        }
+
+        /* Results section: tighter top gap on mobile */
+        @media (max-width: 1023px) {
+            #results-region section {
+                margin-top: 2rem !important;
+            }
+        }
+
+        /* ─── 4px SPACING SYSTEM ─── */
+        /* Scale: 4 / 8 / 12 / 16 / 20 / 24 / 32 / 40 / 48 / 64px */
+        /* Side gutters: 16px mobile, 24px+ tablet */
+
+        /* ─── ERROR TABLE → MOBILE CARDS ─── */
         @media (max-width: 767px) {
             .error-table thead { display: none; }
             .error-table tr {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 0.5rem;
-                padding: 1rem;
+                gap: 8px; /* 4px system */
+                padding: 16px;
                 border-bottom: 1px solid var(--border-color);
-                border-radius: 1rem;
-                margin-bottom: 0.5rem;
+                border-radius: 12px;
+                margin-bottom: 8px;
                 background: var(--bg-color);
             }
-            .error-table td { padding: 0.25rem 0.5rem; }
+            .error-table td { padding: 4px 8px; }
             .error-table td::before {
                 display: block;
-                font-size: 0.6rem;
+                font-size: 0.625rem; /* 10px */
                 font-weight: 700;
                 letter-spacing: 0.15em;
                 text-transform: uppercase;
                 color: var(--text-secondary);
-                margin-bottom: 0.2rem;
+                margin-bottom: 4px;
             }
             .error-table td:nth-child(1)::before { content: 'Method'; }
             .error-table td:nth-child(2)::before { content: 'Value'; }
             .error-table td:nth-child(3)::before { content: 'Abs. Error'; }
             .error-table td:nth-child(4)::before { content: 'Rel. Error'; }
             .error-table td:nth-child(5)::before { content: 'Accuracy'; }
-            /* Make formula formulas on mobile not overflow */
             .min-w-max { min-width: 0 !important; overflow-x: auto; }
         }
 
-        /* ─── SAFE AREA for bottom notch ───────────────────── */
-        .fixed-bottom-safe {
-            padding-bottom: max(1rem, env(safe-area-inset-bottom));
-        }
+        /* ─── MOBILE BORDER-RADIUS SCALE (M3 spec) ─── */
+        /* Inputs: 8-10px | Small cards: 12px | Large cards: 16-24px | Pills: 9999px */
 
-        /* ─── MOBILE FORM REFINEMENTS ───────────────────────── */
+        /* ─── MOBILE FORM CARD: lifts off the background ──── */
         @media (max-width: 1023px) {
-            /* Card feels airy, not boxed-in */
+            /* Card floats above the dark background with clear separation */
             .form-card-mobile {
-                border-radius: 2.5rem;
-                box-shadow: 0 32px 80px -12px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.06);
+                border-radius: 2.5rem !important;
+                box-shadow:
+                    0 0 0 1px rgba(16, 185, 129, 0.15),   /* subtle green rim */
+                    0 24px 60px -8px rgba(0, 0, 0, 0.5),  /* deep lift shadow */
+                    0 4px 16px -4px rgba(0, 0, 0, 0.3);   /* close shadow */
             }
-            /* Inputs feel native-app-like */
-            .form-input-mobile {
-                padding: 1.1rem 1.25rem 0.75rem !important;
-                border-radius: 1rem !important;
+            /* The inner layer gets a slightly warmer/lighter dark so it reads against bg */
+            .form-card-mobile .card-inner {
+                background-color: rgba(255,255,255,0.04) !important;
+                padding: 1.5rem !important;
             }
-            /* Compute button: full-width pill, tall enough to tap */
+            /* Inputs: enough contrast against card, feel native */
+            .form-card-mobile input {
+                background-color: rgba(0,0,0,0.25) !important;
+                border-color: rgba(255,255,255,0.08) !important;
+                border-radius: 0.875rem !important;
+            }
+            .form-card-mobile input:focus {
+                background-color: rgba(0,0,0,0.35) !important;
+                border-color: rgba(16,185,129,0.5) !important;
+            }
+            /* Labels stay readable */
+            .form-card-mobile label {
+                font-size: 0.65rem !important;
+                letter-spacing: 0.12em;
+            }
+            /* Compute button: very bold, impossible to miss */
             .compute-btn-mobile {
                 padding-top: 1.1rem !important;
                 padding-bottom: 1.1rem !important;
                 border-radius: 2rem !important;
+                font-size: 0.75rem !important;
+                letter-spacing: 0.18em !important;
+            }
+            /* Mobile hero label: more breathing room */
+            .mobile-hero-label {
+                padding: 0 0 1rem 0;
             }
         }
 
@@ -326,9 +387,17 @@
         </div>
     </div>
 
-    <header class="bg-theme-card backdrop-blur-3xl py-3 px-4 sm:px-8 mt-4 sm:mt-6 mx-auto w-[95%] max-w-7xl rounded-full shadow-sm sticky top-4 sm:top-6 z-50 border border-theme-border flex justify-between items-center spring-transition">
-        <div class="flex items-center gap-4 sm:gap-8 min-w-0 shrink">
-            <h1 class="text-sm sm:text-base md:text-xl font-bold tracking-widest uppercase text-theme-textP">Finite Differences</h1>
+    <header class="sticky-header bg-theme-card backdrop-blur-3xl py-3 px-4 sm:px-8 mt-4 sm:mt-6 mx-auto w-[95%] max-w-7xl rounded-full shadow-sm sticky z-50 border border-theme-border flex items-center justify-between spring-transition">
+
+        <!-- LEFT: Logo (desktop) + hamburger (mobile) -->
+        <div class="flex items-center gap-3 lg:gap-8">
+            <!-- Hamburger: mobile only, sits on the left -->
+            <button id="openMobileNav" class="lg:hidden w-10 h-10 rounded-full flex items-center justify-center bg-theme-bg border border-theme-border text-theme-textP" aria-label="Open menu">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <!-- Logo: visible on desktop, hidden on mobile (shown centered via absolute below) -->
+            <h1 class="hidden lg:block text-base md:text-xl font-bold tracking-widest uppercase text-theme-textP">Finite Differences</h1>
+            <!-- Desktop nav links -->
             <nav class="hidden lg:flex gap-8">
                 <a href="#main-content" class="text-theme-textS hover:text-theme-textP font-semibold uppercase text-[11px] tracking-widest transition-colors">Calculator</a>
                 <a href="#results-region" class="text-theme-textS hover:text-theme-textP font-semibold uppercase text-[11px] tracking-widest transition-colors">Results</a>
@@ -336,23 +405,22 @@
                 <a href="#examples-section" class="text-theme-textS hover:text-theme-textP font-semibold uppercase text-[11px] tracking-widest transition-colors">Examples</a>
             </nav>
         </div>
-        <div class="flex items-center gap-2">
-            <button id="darkModeToggle" aria-label="Toggle Dark Mode" class="w-10 h-10 rounded-full flex items-center justify-center bg-theme-bg border border-theme-border text-theme-textP hover:scale-105 active:scale-95 transition-transform duration-300">
-                <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-                <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-            </button>
-            <!-- Mobile hamburger: only shown on <lg screens -->
-            <button id="openMobileNav" class="lg:hidden w-10 h-10 rounded-full flex items-center justify-center bg-theme-bg border border-theme-border text-theme-textP" aria-label="Open menu">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-            </button>
-        </div>
+
+        <!-- CENTER: Logo on mobile only (absolutely centered in the pill) -->
+        <h1 class="lg:hidden absolute left-1/2 -translate-x-1/2 text-sm font-bold tracking-widest uppercase text-theme-textP pointer-events-none">Finite Differences</h1>
+
+        <!-- RIGHT: Dark mode toggle -->
+        <button id="darkModeToggle" aria-label="Toggle Dark Mode" class="w-10 h-10 rounded-full flex items-center justify-center bg-theme-bg border border-theme-border text-theme-textP hover:scale-105 active:scale-95 transition-transform duration-300">
+            <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+            <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+        </button>
     </header>
 
-    <main id="main-content" class="w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-24">
+    <main id="main-content" class="w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-16">
         <section class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 lg:gap-24 items-start lg:items-center group">
             
             <!-- Mobile-only punchy header above the form -->
@@ -718,7 +786,7 @@
         {% endif %}
         </div>
 
-        <section id="explanation-section" class="mb-32 text-center scroll-animate opacity-0 translate-y-10 transition-all duration-1000 ease-out">
+        <section id="explanation-section" class="mt-24 sm:mt-32 lg:mt-40 mb-32 text-center scroll-animate opacity-0 translate-y-10 transition-all duration-1000 ease-out">
             <h2 class="text-6xl font-black italic text-theme-textP mb-6 lowercase drop-shadow-sm">what are finite differences?</h2>
             <p class="text-lg max-w-4xl mx-auto mb-16 text-theme-textS font-medium">
                 Finite Differences is a simple math trick used to estimate a derivative (slope) when you don't have a calculus formula. Instead of complex calculus, it uses basic arithmetic to find the rate of change between nearby data points.
