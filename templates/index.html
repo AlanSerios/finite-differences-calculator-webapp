@@ -1058,6 +1058,27 @@
                         const ty = data.graph_data.target_y;
                         calc.setMathBounds({ left: tx - 5, right: tx + 5, bottom: ty - 5, top: ty + 5 });
                     }
+                } else {
+                    // Display error state for domain errors (e.g. log(-5))
+                    if (window.mainCalc) {
+                        // Keep the function curve if possible, but hide target/tangent/secant
+                        window.mainCalc.setExpression({ id: 'target', latex: ``, color: '#000000' });
+                        window.mainCalc.setExpression({ id: 'tangent', latex: ``, color: '#000000' });
+                        window.mainCalc.setExpression({ id: 'secant', latex: ``, color: '#000000' });
+                    }
+                    if (document.getElementById('step-x-li')) {
+                        document.getElementById('step-x-li').innerHTML = `<span class="text-red-500 font-bold">${data.error}</span>`;
+                        document.getElementById('step-h-li').innerHTML = ``;
+                        document.getElementById('step-func-li').innerHTML = ``;
+                    }
+                    const exactAns = document.querySelector('.bg-theme-textP span.font-black');
+                    if (exactAns) exactAns.textContent = "Error";
+                    const resultsAns = document.querySelectorAll('.bg-theme-bg span.text-theme-accent.font-black');
+                    if (resultsAns.length >= 3) {
+                        resultsAns.forEach(ans => ans.textContent = "Error");
+                    }
+                    return;
+                }
                     
                     // Quick update of basic results texts
                     const exactAns = document.querySelector('.bg-theme-textP span.font-black');
