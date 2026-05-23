@@ -142,6 +142,115 @@
             vertical-align: middle;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ─── MOBILE NAV DRAWER ─────────────────────────────── */
+        #mobileNavDrawer {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            display: flex;
+            pointer-events: none;
+        }
+        #mobileNavDrawer.open { pointer-events: all; }
+        #mobileNavBackdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        #mobileNavDrawer.open #mobileNavBackdrop { opacity: 1; }
+        #mobileNavPanel {
+            position: absolute;
+            right: 0; top: 0; bottom: 0;
+            width: min(80vw, 320px);
+            background-color: var(--card-bg);
+            border-left: 1px solid var(--border-color);
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1.5rem;
+            gap: 0.5rem;
+        }
+        #mobileNavDrawer.open #mobileNavPanel { transform: translateX(0); }
+        .mobile-nav-link {
+            display: flex;
+            align-items: center;
+            min-height: 52px;
+            padding: 0 1rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            border-radius: 1rem;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .mobile-nav-link:hover {
+            background: var(--bg-color);
+            color: var(--text-primary);
+        }
+
+        /* ─── TOUCH TARGETS ─────────────────────────────────── */
+        button, input, select, a {
+            -webkit-tap-highlight-color: transparent;
+        }
+        input[type="number"], input[type="text"] {
+            min-height: 56px;
+            font-size: 1rem; /* Prevents iOS zoom-in on focus */
+        }
+
+        /* ─── CLAMP TYPOGRAPHY ──────────────────────────────── */
+        .hero-headline {
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+        }
+        .section-heading {
+            font-size: clamp(2rem, 6vw, 3.75rem);
+        }
+
+        /* ─── NO HORIZONTAL OVERFLOW ────────────────────────── */
+        html, body { overflow-x: hidden; max-width: 100vw; }
+
+        /* Error table → mobile stacked cards */
+        @media (max-width: 767px) {
+            .error-table thead { display: none; }
+            .error-table tr {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+                padding: 1rem;
+                border-bottom: 1px solid var(--border-color);
+                border-radius: 1rem;
+                margin-bottom: 0.5rem;
+                background: var(--bg-color);
+            }
+            .error-table td { padding: 0.25rem 0.5rem; }
+            .error-table td::before {
+                display: block;
+                font-size: 0.6rem;
+                font-weight: 700;
+                letter-spacing: 0.15em;
+                text-transform: uppercase;
+                color: var(--text-secondary);
+                margin-bottom: 0.2rem;
+            }
+            .error-table td:nth-child(1)::before { content: 'Method'; }
+            .error-table td:nth-child(2)::before { content: 'Value'; }
+            .error-table td:nth-child(3)::before { content: 'Abs. Error'; }
+            .error-table td:nth-child(4)::before { content: 'Rel. Error'; }
+            .error-table td:nth-child(5)::before { content: 'Accuracy'; }
+            /* Make formula formulas on mobile not overflow */
+            .min-w-max { min-width: 0 !important; overflow-x: auto; }
+        }
+
+        /* ─── SAFE AREA for bottom notch ───────────────────── */
+        .fixed-bottom-safe {
+            padding-bottom: max(1rem, env(safe-area-inset-bottom));
+        }
     </style>
 </head>
 
@@ -151,9 +260,26 @@
     
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:p-4 focus:bg-theme-card focus:text-theme-textP focus:z-50">Skip to content</a>
 
-    <header class="bg-theme-card backdrop-blur-3xl py-3 px-6 sm:px-8 mt-6 mx-auto w-[95%] max-w-7xl rounded-full shadow-sm sticky top-6 z-50 border border-theme-border flex justify-between items-center spring-transition">
-        <div class="flex items-center gap-8 min-w-0 shrink">
-            <h1 class="text-base md:text-xl font-bold tracking-widest uppercase text-theme-textP">Finite Differences</h1>
+    <!-- Mobile Nav Drawer -->
+    <div id="mobileNavDrawer" role="dialog" aria-modal="true" aria-label="Navigation Menu">
+        <div id="mobileNavBackdrop"></div>
+        <div id="mobileNavPanel">
+            <div class="flex justify-between items-center mb-6">
+                <span class="text-base font-black uppercase tracking-widest text-theme-textP">Menu</span>
+                <button id="closeMobileNav" class="w-11 h-11 rounded-full border border-theme-border flex items-center justify-center text-theme-textP" aria-label="Close menu">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <a href="#main-content" class="mobile-nav-link" onclick="closeMobileNavFn()">Calculator</a>
+            <a href="#results-region" class="mobile-nav-link" onclick="closeMobileNavFn()">Results</a>
+            <a href="#explanation-section" class="mobile-nav-link" onclick="closeMobileNavFn()">Theory</a>
+            <a href="#examples-section" class="mobile-nav-link" onclick="closeMobileNavFn()">Examples</a>
+        </div>
+    </div>
+
+    <header class="bg-theme-card backdrop-blur-3xl py-3 px-4 sm:px-8 mt-4 sm:mt-6 mx-auto w-[95%] max-w-7xl rounded-full shadow-sm sticky top-4 sm:top-6 z-50 border border-theme-border flex justify-between items-center spring-transition">
+        <div class="flex items-center gap-4 sm:gap-8 min-w-0 shrink">
+            <h1 class="text-sm sm:text-base md:text-xl font-bold tracking-widest uppercase text-theme-textP">Finite Differences</h1>
             <nav class="hidden lg:flex gap-8">
                 <a href="#main-content" class="text-theme-textS hover:text-theme-textP font-semibold uppercase text-[11px] tracking-widest transition-colors">Calculator</a>
                 <a href="#results-region" class="text-theme-textS hover:text-theme-textP font-semibold uppercase text-[11px] tracking-widest transition-colors">Results</a>
@@ -161,28 +287,34 @@
                 <a href="#examples-section" class="text-theme-textS hover:text-theme-textP font-semibold uppercase text-[11px] tracking-widest transition-colors">Examples</a>
             </nav>
         </div>
-        <button id="darkModeToggle" aria-label="Toggle Dark Mode" class="w-10 h-10 rounded-full flex items-center justify-center bg-theme-bg border border-theme-border text-theme-textP hover:scale-105 active:scale-95 transition-transform duration-300">
-            <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-            </svg>
-            <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-        </button>
+        <div class="flex items-center gap-2">
+            <button id="darkModeToggle" aria-label="Toggle Dark Mode" class="w-10 h-10 rounded-full flex items-center justify-center bg-theme-bg border border-theme-border text-theme-textP hover:scale-105 active:scale-95 transition-transform duration-300">
+                <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            </button>
+            <!-- Mobile hamburger: only shown on <lg screens -->
+            <button id="openMobileNav" class="lg:hidden w-10 h-10 rounded-full flex items-center justify-center bg-theme-bg border border-theme-border text-theme-textP" aria-label="Open menu">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
     </header>
 
-    <main id="main-content" class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-40">
-        <section class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 lg:gap-24 items-center group">
+    <main id="main-content" class="w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-24">
+        <section class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 lg:gap-24 items-start lg:items-center group">
             
             <div class="lg:w-[55%] flex flex-col justify-center relative z-10 reveal-hidden" data-reveal>
-                <div class="inline-block w-max rounded-full px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] font-bold bg-theme-card border border-theme-border text-theme-accent mb-6 shadow-sm">
+                <div class="inline-block w-max rounded-full px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] font-bold bg-theme-card border border-theme-border text-theme-accent mb-4 sm:mb-6 shadow-sm">
                     Numerical Methods Engine
                 </div>
-                <h2 class="text-5xl sm:text-7xl lg:text-[6rem] font-bold text-theme-textP leading-[1.05] tracking-tight mb-8 max-w-6xl">
+                <h2 class="hero-headline font-bold text-theme-textP mb-4 sm:mb-8 max-w-6xl">
                     Calculate finite differences instantly.
                 </h2>
-                <p class="text-lg md:text-xl text-theme-textS font-medium mb-12 max-w-2xl leading-relaxed">
-                    A precision-engineered numerical calculator designed for evaluating forward, central, and backward differences. Supply your parameters and automatically generate analytical solutions and interactive visual plots.
+                <p class="text-base md:text-xl text-theme-textS font-medium mb-6 sm:mb-12 max-w-2xl leading-relaxed">
+                    A precision-engineered numerical calculator for evaluating forward, central, and backward differences with interactive visual plots.
                 </p>
             </div>
             
@@ -320,47 +452,85 @@
             <div class="mt-12 bg-theme-card w-full reveal-hidden" data-reveal>
                 <div class="card-inner p-8 lg:p-16 flex flex-col">
                     <h3 class="text-xs font-bold text-theme-textS uppercase tracking-[0.2em] mb-10 border-b border-theme-border pb-4">Error Analysis</h3>
-                    <div class="overflow-x-auto w-full">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="border-b-2 border-theme-border">
-                                    <th class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-theme-textP">Method</th>
-                                    <th class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-theme-textP">Value</th>
-                                    <th class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-theme-textP">Absolute Error</th>
-                                    <th class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-theme-textP">Relative Error (%)</th>
-                                    <th class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-theme-textP">Accuracy</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-theme-textS font-medium">
-                                {% for method in ['forward', 'central', 'backward'] %}
-                                <tr class="border-b border-theme-border hover:bg-theme-bg/50 transition-colors">
-                                    <td class="py-5 px-6 text-xs font-bold capitalize text-theme-textP tracking-widest">{{ method }}</td>
-                                    <td class="py-5 px-6 font-semibold">{{ results[method] }}</td>
-                                    <td class="py-5 px-6">{{ results.errors[method ~ '_abs'] }}</td>
-                                    <td class="py-5 px-6">
-                                        {% if results.errors[method ~ '_rel'] is not none %}
-                                            {{ results.errors[method ~ '_rel'] }}%
-                                        {% else %}
-                                            <span class="opacity-50">N/A</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="py-5 px-6 text-xs font-bold tracking-widest">
-                                        {% if results.errors[method ~ '_rel'] is not none %}
-                                            {% if results.errors[method ~ '_rel'] < 1 %}
-                                                <span class="text-[#10B981] flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-[#10B981]"></div>High</span>
-                                            {% elif results.errors[method ~ '_rel'] <= 5 %}
-                                                <span class="text-[#F59E0B] flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-[#F59E0B]"></div>Moderate</span>
+                    <div class="w-full">
+                        <!-- Desktop table (hidden on mobile) -->
+                        <div class="hidden sm:block overflow-x-auto">
+                            <table class="error-table w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b-2 border-theme-border">
+                                        <th class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-theme-textP">Method</th>
+                                        <th class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-theme-textP">Value</th>
+                                        <th class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-theme-textP">Absolute Error</th>
+                                        <th class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-theme-textP">Relative Error (%)</th>
+                                        <th class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-theme-textP">Accuracy</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-theme-textS font-medium">
+                                    {% for method in ['forward', 'central', 'backward'] %}
+                                    <tr class="border-b border-theme-border hover:bg-theme-bg/50 transition-colors">
+                                        <td class="py-5 px-6 text-xs font-bold capitalize text-theme-textP tracking-widest">{{ method }}</td>
+                                        <td class="py-5 px-6 font-semibold">{{ results[method] }}</td>
+                                        <td class="py-5 px-6">{{ results.errors[method ~ '_abs'] }}</td>
+                                        <td class="py-5 px-6">
+                                            {% if results.errors[method ~ '_rel'] is not none %}
+                                                {{ results.errors[method ~ '_rel'] }}%
                                             {% else %}
-                                                <span class="text-[#EF4444] flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-[#EF4444]"></div>Low</span>
+                                                <span class="opacity-50">N/A</span>
                                             {% endif %}
+                                        </td>
+                                        <td class="py-5 px-6 text-xs font-bold tracking-widest">
+                                            {% if results.errors[method ~ '_rel'] is not none %}
+                                                {% if results.errors[method ~ '_rel'] < 1 %}
+                                                    <span class="text-[#10B981] flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-[#10B981]"></div>High</span>
+                                                {% elif results.errors[method ~ '_rel'] <= 5 %}
+                                                    <span class="text-[#F59E0B] flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-[#F59E0B]"></div>Moderate</span>
+                                                {% else %}
+                                                    <span class="text-[#EF4444] flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-[#EF4444]"></div>Low</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="opacity-50">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Mobile stacked cards (shown only on mobile) -->
+                        <div class="sm:hidden flex flex-col gap-4">
+                            {% for method in ['forward', 'central', 'backward'] %}
+                            <div class="bg-theme-bg border border-theme-border rounded-2xl p-5 space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-black uppercase tracking-widest text-theme-textP capitalize">{{ method }}</span>
+                                    {% if results.errors[method ~ '_rel'] is not none %}
+                                        {% if results.errors[method ~ '_rel'] < 1 %}
+                                            <span class="text-[#10B981] flex items-center gap-1.5 text-xs font-bold"><div class="w-2 h-2 rounded-full bg-[#10B981]"></div>High</span>
+                                        {% elif results.errors[method ~ '_rel'] <= 5 %}
+                                            <span class="text-[#F59E0B] flex items-center gap-1.5 text-xs font-bold"><div class="w-2 h-2 rounded-full bg-[#F59E0B]"></div>Moderate</span>
                                         {% else %}
-                                            <span class="opacity-50">N/A</span>
+                                            <span class="text-[#EF4444] flex items-center gap-1.5 text-xs font-bold"><div class="w-2 h-2 rounded-full bg-[#EF4444]"></div>Low</span>
                                         {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                    {% else %}
+                                        <span class="text-xs opacity-50">N/A</span>
+                                    {% endif %}
+                                </div>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div>
+                                        <p class="text-[9px] uppercase tracking-widest text-theme-textS mb-1">Value</p>
+                                        <p class="font-bold text-theme-textP text-sm">{{ results[method] }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[9px] uppercase tracking-widest text-theme-textS mb-1">Abs. Err</p>
+                                        <p class="font-bold text-theme-textP text-sm">{{ results.errors[method ~ '_abs'] }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[9px] uppercase tracking-widest text-theme-textS mb-1">Rel. Err</p>
+                                        <p class="font-bold text-theme-textP text-sm">{% if results.errors[method ~ '_rel'] is not none %}{{ results.errors[method ~ '_rel'] }}%{% else %}N/A{% endif %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -756,6 +926,24 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.scroll-animate').forEach(el => scrollObserver.observe(el));
         });
+
+        // Mobile Nav Drawer Logic
+        const mobileNavDrawer = document.getElementById('mobileNavDrawer');
+        const mobileNavBackdrop = document.getElementById('mobileNavBackdrop');
+        
+        function openMobileNavFn() {
+            mobileNavDrawer.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMobileNavFn() {
+            mobileNavDrawer.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        
+        document.getElementById('openMobileNav')?.addEventListener('click', openMobileNavFn);
+        document.getElementById('closeMobileNav')?.addEventListener('click', closeMobileNavFn);
+        mobileNavBackdrop?.addEventListener('click', closeMobileNavFn);
+
 
         document.getElementById('calcForm').addEventListener('submit', async function(e) {
             e.preventDefault();
