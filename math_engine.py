@@ -14,10 +14,16 @@ def calculate_finite_differences(func_str, x_val, h_val):
         f_prime = sp.lambdify(x, f_prime_expr, 'numpy')
         exact_diff = float(f_prime(x_val))
         
+        import math
         # Evaluate mathematical steps
         fx = float(f(x_val))
         fx_plus_h = float(f(x_val + h_val))
         fx_minus_h = float(f(x_val - h_val))
+        
+        if math.isnan(fx) or math.isnan(fx_plus_h) or math.isnan(fx_minus_h):
+            raise ValueError("Mathematical domain error: Function is undefined at these points (e.g. log of negative number).")
+        if math.isinf(fx) or math.isinf(fx_plus_h) or math.isinf(fx_minus_h):
+            raise ValueError("Mathematical domain error: Function evaluates to infinity at these points.")
         
         # Core Calculations
         forward_diff = (fx_plus_h - fx) / h_val
