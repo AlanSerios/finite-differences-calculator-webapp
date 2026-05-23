@@ -211,12 +211,12 @@
                         </div>
                         
                         <div class="relative w-full">
-                            <input id="h_value" name="h_value" value="{{ inputs.get('h_value', '0.1') }}" type="number" step="any" class="peer w-full bg-theme-card border border-theme-border pt-7 pb-3 px-4 sm:px-6 rounded-2xl text-theme-textP font-semibold focus:ring-2 focus:ring-theme-accent focus:border-transparent outline-none transition-all shadow-inner" placeholder=" " aria-label="Given H Value">
+                            <input id="h_value" name="h_value" value="{{ inputs.get('h_value', '') }}" type="number" step="any" class="peer w-full bg-theme-card border border-theme-border pt-7 pb-3 px-4 sm:px-6 rounded-2xl text-theme-textP font-semibold focus:ring-2 focus:ring-theme-accent focus:border-transparent outline-none transition-all shadow-inner" placeholder=" " aria-label="Given H Value">
                             <label for="h_value" class="absolute left-4 sm:left-6 top-5 -translate-y-3 text-[10px] font-bold uppercase tracking-wide text-theme-textS transition-all peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-sm peer-focus:-translate-y-3 peer-focus:text-[10px] peer-focus:text-theme-accent cursor-text pointer-events-none">Given H Value</label>
                         </div>
 
                         <div class="relative w-full">
-                            <input id="function" name="function" value="{{ inputs.get('function', 'x**2') }}" type="text" class="peer w-full bg-theme-card border border-theme-border pt-7 pb-3 px-4 sm:px-6 rounded-2xl text-theme-textP font-semibold focus:ring-2 focus:ring-theme-accent focus:border-transparent outline-none transition-all shadow-inner" placeholder=" " aria-label="Function">
+                            <input id="function" name="function" value="{{ inputs.get('function', '') }}" type="text" class="peer w-full bg-theme-card border border-theme-border pt-7 pb-3 px-4 sm:px-6 rounded-2xl text-theme-textP font-semibold focus:ring-2 focus:ring-theme-accent focus:border-transparent outline-none transition-all shadow-inner" placeholder=" " aria-label="Function">
                             <label for="function" class="absolute left-4 sm:left-6 top-5 -translate-y-3 text-[10px] font-bold uppercase tracking-wide text-theme-textS transition-all peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-sm peer-focus:-translate-y-3 peer-focus:text-[10px] peer-focus:text-theme-accent cursor-text pointer-events-none">Function</label>
                             
                             <!-- MathJax Preview Box -->
