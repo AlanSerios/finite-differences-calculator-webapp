@@ -1018,7 +1018,47 @@
             });
         }
 
-        funcInput.addEventListener('input', () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(fetchNewResults, 500); });
+        let previewDebounceTimer;
+        funcInput.addEventListener('input', () => { 
+            clearTimeout(debounceTimer); 
+            debounceTimer = setTimeout(fetchNewResults, 500); 
+            
+            clearTimeout(previewDebounceTimer);
+            previewDebounceTimer = setTimeout(updatePreview, 100);
+        });
+
+        async function updatePreview() {
+            const func = funcInput.value;
+            const mathPreview = document.getElementById('mathPreview');
+            if (!mathPreview) return;
+            
+            if (!func.trim()) {
+                mathPreview.innerHTML = '';
+                if (window.MathJax) MathJax.typesetClear([mathPreview]);
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/preview', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ function: func })
+                });
+                
+                const data = await response.json();
+                if (data.success && data.function_latex) {
+                    mathPreview.innerHTML = `$$f(x) = ${data.function_latex}$$`;
+                    if (window.MathJax) {
+                        MathJax.typesetClear([mathPreview]);
+                        MathJax.typesetPromise([mathPreview]);
+                    }
+                } else if (!data.success) {
+                    mathPreview.innerHTML = `<span class="text-red-500 text-sm">Error: ${data.error}</span>`;
+                }
+            } catch (err) {
+                console.error("Preview error:", err);
+            }
+        }
 
         async function fetchNewResults() {
             const x = xInput.value;
@@ -1036,11 +1076,14 @@
                 
                 const data = await response.json();
                 if (data.success) {
-                    // Update MathJax Preview
+                    // Update MathJax Preview and History
                     const mathPreview = document.getElementById('mathPreview');
                     if (mathPreview && data.function_latex) {
                         mathPreview.innerHTML = `$$f(x) = ${data.function_latex}$$`;
-                        if (window.MathJax) MathJax.typesetPromise([mathPreview]);
+                        if (window.MathJax) {
+                            MathJax.typesetClear([mathPreview]);
+                            MathJax.typesetPromise([mathPreview]);
+                        }
                         saveToHistory(func, x, h, data.function_latex);
                     }
 
