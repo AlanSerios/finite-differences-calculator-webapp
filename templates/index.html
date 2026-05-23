@@ -6,9 +6,7 @@
     <title>Finite Differences Calculator</title>
     
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+    <script src="https://www.desmos.com/api/v1.8/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -246,14 +244,16 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 relative z-10">
                 <!-- Graph Card (Spans 4 columns) -->
                 <div class="lg:col-span-4 bg-theme-card rounded-[40px] overflow-hidden flex flex-col min-h-[400px] border border-theme-border order-1">
-                    <div class="flex-1 p-6 bg-theme-bg w-full relative">
-                        <button id="resetZoomBtn" type="button" class="absolute top-8 right-8 bg-theme-card/90 backdrop-blur-sm text-theme-textP px-4 py-2 rounded-full text-xs font-bold border border-theme-border shadow-sm hover:bg-theme-bg transition-colors z-10 flex items-center gap-2 interactive-btn">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                            Reset View
-                        </button>
-                        <canvas id="functionPlot" class="w-full h-full max-h-[350px]" aria-label="Accuracy Plot Graph" role="img"></canvas>
+                    <div class="flex-1 p-0 relative min-h-[350px]">
+                        <div id="functionPlot" class="w-full h-full absolute inset-0" aria-label="Accuracy Plot Graph"></div>
+                        <div class="absolute top-4 left-4 bg-theme-card/90 backdrop-blur-sm border border-theme-border rounded-xl p-3 shadow-sm z-10 text-xs font-semibold text-theme-textP space-y-1.5 pointer-events-none">
+                            <div class="flex items-center gap-2"><div class="w-3 h-0.5 bg-black dark:bg-white"></div><span>Original Function f(x)</span></div>
+                            <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full bg-[#10B981]"></div><span>Target Point</span></div>
+                            <div class="flex items-center gap-2"><div class="w-3 h-0 border-t-2 border-dashed border-[#3EBD93]"></div><span>True Tangent</span></div>
+                            <div class="flex items-center gap-2"><div class="w-3 h-0 border-t-2 border-dashed border-[#EF4444]"></div><span>Secant (Calculated)</span></div>
+                        </div>
                     </div>
-                    <div class="bg-theme-textP py-4 px-8 mt-auto flex justify-between items-center">
+                    <div class="bg-theme-textP py-4 px-8 mt-auto flex justify-between items-center border-t border-theme-border">
                         <span class="text-theme-inverted text-sm font-medium">Graphing: f(x) = {{ inputs.function }}</span>
                         <h3 class="text-xl font-bold italic text-theme-inverted text-right uppercase">Accuracy Plot</h3>
                     </div>
@@ -449,78 +449,30 @@
                     document.body.removeChild(link);
                 }
 
-                // Chart.js Initialization
+                // Desmos Initialization
                 document.addEventListener("DOMContentLoaded", function() {
-                    const canvas = document.getElementById('functionPlot');
-                    if (canvas) {
-                        const ctx = canvas.getContext('2d');
-                        const labels = {{ results.graph_data.x_points | tojson | safe }};
-                        const targetX = {{ results.graph_data.target_x }};
-                        const targetY = {{ results.graph_data.target_y }};
+                    const graphDiv = document.getElementById('functionPlot');
+                    if (graphDiv) {
                         const isDark = document.documentElement.classList.contains('dark');
-                        const gridColor = isDark ? '#334155' : '#D9E2EC';
-                        const textColor = isDark ? '#E2E8F0' : '#102A43';
-
-                        new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: labels,
-                                datasets: [
-                                {
-                                    label: 'Original Function f(x)',
-                                    data: {{ results.graph_data.y_fx | tojson | safe }},
-                                    borderColor: textColor,
-                                    borderWidth: 4,
-                                    tension: 0.4,
-                                    pointRadius: 0
-                                },
-                                {
-                                    label: 'Actual Derivative (True Tangent)',
-                                    data: {{ results.graph_data.y_tangent | tojson | safe }},
-                                    borderColor: '#3EBD93',
-                                    borderWidth: 2,
-                                    borderDash: [5, 5],
-                                    pointRadius: 0
-                                },
-                                {
-                                    label: 'Finite Difference (Secant Line)',
-                                    data: {{ results.graph_data.y_secant | tojson | safe }},
-                                    borderColor: '#E11D48',
-                                    borderWidth: 2,
-                                    borderDash: [2, 2],
-                                    pointRadius: 0
-                                },
-                                {
-                                    label: 'Target Point (x)',
-                                    data: labels.map(lbl => lbl === targetX ? targetY : null),
-                                    backgroundColor: textColor,
-                                    borderColor: textColor,
-                                    pointRadius: 6,
-                                    pointHoverRadius: 8
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { 
-                                    zoom: {
-                                        pan: { enabled: true, mode: 'xy' },
-                                        zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'xy' }
-                                    },
-                                    legend: { 
-                                        display: true,
-                                        position: 'bottom',
-                                        labels: { usePointStyle: true, padding: 20, font: { family: 'Inter', weight: 'bold' }, color: textColor }
-                                    },
-                                    tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + context.parsed.y.toFixed(4); } } }
-                                },
-                                scales: { 
-                                    x: { grid: { color: gridColor }, ticks: { color: textColor } }, 
-                                    y: { grid: { color: gridColor }, ticks: { color: textColor } } 
-                                }
-                            }
+                        window.mainCalc = Desmos.GraphingCalculator(graphDiv, {
+                            expressions: false,
+                            settingsMenu: false,
+                            zoomButtons: true,
+                            lockViewport: false,
+                            invertedColors: isDark,
+                            border: false
                         });
+                        });
+                        const calc = window.mainCalc;
+                        calc.setExpression({ id: 'f', latex: `y = {{ results.function_latex | safe }}`, color: '#000000' });
+                        calc.setExpression({ id: 'target', latex: `({{ results.graph_data.target_x }}, {{ results.graph_data.target_y }})`, color: getDesmosColor('#10B981', isDark), showLabel: true });
+                        calc.setExpression({ id: 'tangent', latex: `y - {{ results.graph_data.target_y }} = {{ results.exact_derivative }} * (x - {{ results.graph_data.target_x }})`, color: getDesmosColor('#3EBD93', isDark), lineStyle: Desmos.Styles.DASHED });
+                        calc.setExpression({ id: 'secant', latex: `y - {{ results.graph_data.target_y }} = {{ results.central }} * (x - {{ results.graph_data.target_x }})`, color: getDesmosColor('#EF4444', isDark), lineStyle: Desmos.Styles.DASHED });
                         
+                        const tx = {{ results.graph_data.target_x }};
+                        const ty = {{ results.graph_data.target_y }};
+                        calc.setMathBounds({ left: tx - 5, right: tx + 5, bottom: ty - 5, top: ty + 5 });
+
                         document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
                     }
                 });
@@ -624,10 +576,15 @@
                         </div>
                     </div>
                     <div class="lg:col-span-2 bg-theme-bg rounded-[32px] overflow-hidden flex flex-col min-h-[300px] border border-theme-border relative">
-                        <div class="flex-1 p-6 relative">
-                            <canvas id="exampleChart1" class="w-full h-full max-h-[300px]"></canvas>
+                        <div class="flex-1 p-0 relative min-h-[300px]">
+                            <div id="exampleChart1" class="w-full h-full absolute inset-0"></div>
+                            <div class="absolute top-4 left-4 bg-theme-card/90 backdrop-blur-sm border border-theme-border rounded-xl p-3 shadow-sm z-10 text-xs font-semibold text-theme-textP space-y-1.5 pointer-events-none">
+                                <div class="flex items-center gap-2"><div class="w-3 h-0.5 bg-black dark:bg-white"></div><span>Original Function f(x)</span></div>
+                                <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full bg-[#10B981]"></div><span>Target Point</span></div>
+                                <div class="flex items-center gap-2"><div class="w-3 h-0 border-t-2 border-dashed border-[#3EBD93]"></div><span>True Tangent</span></div>
+                            </div>
                         </div>
-                        <div class="bg-theme-textP py-4 px-8 mt-auto">
+                        <div class="bg-theme-textP py-4 px-8 mt-auto border-t border-theme-border">
                             <h3 class="text-lg font-bold italic text-theme-inverted text-right uppercase">Polynomial Function Plot</h3>
                         </div>
                     </div>
@@ -664,10 +621,15 @@
                         </div>
                     </div>
                     <div class="lg:col-span-2 bg-theme-bg rounded-[32px] overflow-hidden flex flex-col min-h-[300px] border border-theme-border relative">
-                        <div class="flex-1 p-6 relative">
-                            <canvas id="exampleChart2" class="w-full h-full max-h-[300px]"></canvas>
+                        <div class="flex-1 p-0 relative min-h-[300px]">
+                            <div id="exampleChart2" class="w-full h-full absolute inset-0"></div>
+                            <div class="absolute top-4 left-4 bg-theme-card/90 backdrop-blur-sm border border-theme-border rounded-xl p-3 shadow-sm z-10 text-xs font-semibold text-theme-textP space-y-1.5 pointer-events-none">
+                                <div class="flex items-center gap-2"><div class="w-3 h-0.5 bg-black dark:bg-white"></div><span>Original Function f(x)</span></div>
+                                <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full bg-[#10B981]"></div><span>Target Point</span></div>
+                                <div class="flex items-center gap-2"><div class="w-3 h-0 border-t-2 border-dashed border-[#3EBD93]"></div><span>True Tangent</span></div>
+                            </div>
                         </div>
-                        <div class="bg-theme-textP py-4 px-8 mt-auto">
+                        <div class="bg-theme-textP py-4 px-8 mt-auto border-t border-theme-border">
                             <h3 class="text-lg font-bold italic text-theme-inverted text-right uppercase">Trigonometric Function Plot</h3>
                         </div>
                     </div>
@@ -677,52 +639,35 @@
             <script>
                 document.addEventListener("DOMContentLoaded", function() {
                     const isDark = document.documentElement.classList.contains('dark');
-                    const gridColor = isDark ? '#334155' : '#D9E2EC';
-                    const textColor = isDark ? '#E2E8F0' : '#102A43';
-
-                    const chartOptions = {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: true, position: 'bottom', labels: { usePointStyle: true, color: textColor, padding: 20, font: { family: 'Inter', weight: 'bold' } } } },
-                        scales: { 
-                            x: { grid: { color: gridColor }, ticks: { color: textColor } }, 
-                            y: { grid: { color: gridColor }, ticks: { color: textColor } } 
-                        }
+                    const desmosOptions = {
+                        expressions: false,
+                        settingsMenu: false,
+                        zoomButtons: true,
+                        lockViewport: false,
+                        invertedColors: isDark,
+                        border: false
                     };
 
-                    const ctx1 = document.getElementById('exampleChart1');
-                    if (ctx1) {
-                        const xVals = Array.from({length: 21}, (_, i) => -2 + i * 0.4);
-                        new Chart(ctx1.getContext('2d'), {
-                            type: 'line',
-                            data: {
-                                labels: xVals.map(x => x.toFixed(1)),
-                                datasets: [
-                                    { label: 'f(x) = x²', data: xVals.map(x => x*x), borderColor: textColor, borderWidth: 3, pointRadius: 0 },
-                                    { label: 'True Tangent', data: xVals.map(x => 4*(x-2) + 4), borderColor: '#3EBD93', borderDash: [5,5], borderWidth: 2, pointRadius: 0 },
-                                    { label: 'Target x=2.0', data: xVals.map(x => x.toFixed(1) === '2.0' ? 4 : null), backgroundColor: textColor, borderColor: textColor, pointRadius: 6, pointHoverRadius: 8 }
-                                ]
-                            },
-                            options: chartOptions
-                        });
+                    const elt1 = document.getElementById('exampleChart1');
+                    if (elt1) {
+                        const calc1 = Desmos.GraphingCalculator(elt1, desmosOptions);
+                        calc1.setExpression({ id: 'f1', latex: 'y = x^2', color: '#000000' });
+                        calc1.setExpression({ id: 'point1', latex: '(2, 4)', color: getDesmosColor('#10B981', isDark), showLabel: true });
+                        calc1.setExpression({ id: 'tangent1', latex: 'y - 4 = 4(x - 2)', color: getDesmosColor('#3EBD93', isDark), lineStyle: Desmos.Styles.DASHED });
+                        calc1.setMathBounds({ left: -2, right: 6, bottom: -2, top: 18 });
                     }
 
-                    const ctx2 = document.getElementById('exampleChart2');
-                    if (ctx2) {
-                        const xVals2 = Array.from({length: 41}, (_, i) => -3.14 + i * 0.157);
-                        new Chart(ctx2.getContext('2d'), {
-                            type: 'line',
-                            data: {
-                                labels: xVals2.map(x => x.toFixed(1)),
-                                datasets: [
-                                    { label: 'f(x) = sin(x)', data: xVals2.map(x => Math.sin(x)), borderColor: textColor, borderWidth: 3, pointRadius: 0 },
-                                    { label: 'True Tangent', data: xVals2.map(x => Math.cos(0)*(x-0) + Math.sin(0)), borderColor: '#3EBD93', borderDash: [5,5], borderWidth: 2, pointRadius: 0 },
-                                    { label: 'Target x=0.0', data: xVals2.map(x => (Math.abs(x) < 0.1) ? 0 : null), backgroundColor: textColor, borderColor: textColor, pointRadius: 6, pointHoverRadius: 8 }
-                                ]
-                            },
-                            options: chartOptions
-                        });
+                    const elt2 = document.getElementById('exampleChart2');
+                    if (elt2) {
+                        const calc2 = Desmos.GraphingCalculator(elt2, desmosOptions);
+                        calc2.setExpression({ id: 'f2', latex: 'y = \\sin(x)', color: '#000000' });
+                        calc2.setExpression({ id: 'point2', latex: '(0, 0)', color: getDesmosColor('#10B981', isDark), showLabel: true });
+                        calc2.setExpression({ id: 'tangent2', latex: 'y - 0 = 1(x - 0)', color: getDesmosColor('#3EBD93', isDark), lineStyle: Desmos.Styles.DASHED });
+                        calc2.setMathBounds({ left: -4, right: 4, bottom: -2, top: 2 });
                     }
+                    
+                    window.exampleCalc1 = elt1 ? calc1 : null;
+                    window.exampleCalc2 = elt2 ? calc2 : null;
                 });
             </script>
         </section>
@@ -1088,17 +1033,30 @@
                     }
 
                     // Quick update of main chart
-                    const chartCanvas = document.getElementById('functionPlot');
-                    if (chartCanvas) {
-                        const chart = Chart.getChart(chartCanvas);
-                        if (chart) {
-                            chart.data.labels = data.graph_data.x_points;
-                            chart.data.datasets[0].data = data.graph_data.y_fx;
-                            chart.data.datasets[1].data = data.graph_data.y_tangent;
-                            chart.data.datasets[2].data = data.graph_data.y_secant;
-                            chart.data.datasets[3].data = data.graph_data.x_points.map(lbl => lbl === data.graph_data.target_x ? data.graph_data.target_y : null);
-                            chart.update('none'); // Snappy update
+                    const graphDiv = document.getElementById('functionPlot');
+                    if (graphDiv) {
+                        const isDark = document.documentElement.classList.contains('dark');
+                        if (!window.mainCalc) {
+                            window.mainCalc = Desmos.GraphingCalculator(graphDiv, {
+                                expressions: false,
+                                settingsMenu: false,
+                                zoomButtons: true,
+                                lockViewport: false,
+                                invertedColors: isDark,
+                                border: false
+                            });
                         }
+                        
+                        const calc = window.mainCalc;
+                        calc.setExpression({ id: 'f', latex: `y = ${data.function_latex}`, color: '#000000' });
+                        calc.setExpression({ id: 'target', latex: `(${data.graph_data.target_x}, ${data.graph_data.target_y})`, color: getDesmosColor('#10B981', isDark), showLabel: true });
+                        calc.setExpression({ id: 'tangent', latex: `y - ${data.graph_data.target_y} = ${data.exact_derivative} * (x - ${data.graph_data.target_x})`, color: getDesmosColor('#3EBD93', isDark), lineStyle: Desmos.Styles.DASHED });
+                        calc.setExpression({ id: 'secant', latex: `y - ${data.graph_data.target_y} = ${data.central} * (x - ${data.graph_data.target_x})`, color: getDesmosColor('#EF4444', isDark), lineStyle: Desmos.Styles.DASHED });
+                        
+                        // Recenter the viewport around the target point
+                        const tx = data.graph_data.target_x;
+                        const ty = data.graph_data.target_y;
+                        calc.setMathBounds({ left: tx - 5, right: tx + 5, bottom: ty - 5, top: ty + 5 });
                     }
                     
                     // Quick update of basic results texts
@@ -1179,6 +1137,14 @@
             moonIcon.classList.add('hidden');
         }
 
+        function getDesmosColor(hexColor, isDark) {
+            if (!isDark) return hexColor;
+            let r = 255 - parseInt(hexColor.slice(1, 3), 16);
+            let g = 255 - parseInt(hexColor.slice(3, 5), 16);
+            let b = 255 - parseInt(hexColor.slice(5, 7), 16);
+            return '#' + r.toString(16).padStart(2, '0') + g.toString(16).padStart(2, '0') + b.toString(16).padStart(2, '0');
+        }
+
         darkModeToggle.addEventListener('click', () => {
             htmlElement.classList.toggle('dark');
             const isDark = htmlElement.classList.contains('dark');
@@ -1194,34 +1160,24 @@
                 localStorage.setItem('theme', 'light');
             }
 
-            // Update Chart grid colors if it exists
-            const chartsToUpdate = ['functionPlot', 'exampleChart1', 'exampleChart2'];
-            chartsToUpdate.forEach(id => {
-                const chartCanvas = document.getElementById(id);
-                if (chartCanvas) {
-                    const chart = Chart.getChart(chartCanvas);
-                    if (chart) {
-                        const gridColor = isDark ? '#334155' : '#D9E2EC';
-                        const textColor = isDark ? '#E2E8F0' : '#102A43';
-                        
-                        chart.options.scales.x.grid.color = gridColor;
-                        chart.options.scales.y.grid.color = gridColor;
-                        chart.options.scales.x.ticks.color = textColor;
-                        chart.options.scales.y.ticks.color = textColor;
-                        chart.options.plugins.legend.labels.color = textColor;
-                        
-                        // Update dataset colors
-                        chart.data.datasets[0].borderColor = textColor; // f(x)
-                        
-                        // the target point dataset is either index 3 (main chart) or index 2 (examples)
-                        const targetIndex = id === 'functionPlot' ? 3 : 2;
-                        if (chart.data.datasets.length > targetIndex) {
-                            chart.data.datasets[targetIndex].backgroundColor = textColor; 
-                            chart.data.datasets[targetIndex].borderColor = textColor; 
-                        }
-                        
-                        chart.update();
-                    }
+            // Update Desmos inverted colors
+            const calcsToUpdate = [window.mainCalc, window.exampleCalc1, window.exampleCalc2];
+            calcsToUpdate.forEach(calc => {
+                if (calc) {
+                    calc.updateSettings({ invertedColors: isDark });
+                    // To update colors of existing lines (like f(x)) that depend on theme:
+                    calc.setExpression({ id: 'f', color: '#000000' });
+                    calc.setExpression({ id: 'f1', color: '#000000' });
+                    calc.setExpression({ id: 'f2', color: '#000000' });
+                    
+                    // We must also update the other custom lines to pre-invert their colors
+                    calc.setExpression({ id: 'target', color: getDesmosColor('#10B981', isDark) });
+                    calc.setExpression({ id: 'tangent', color: getDesmosColor('#3EBD93', isDark) });
+                    calc.setExpression({ id: 'secant', color: getDesmosColor('#EF4444', isDark) });
+                    calc.setExpression({ id: 'point1', color: getDesmosColor('#10B981', isDark) });
+                    calc.setExpression({ id: 'tangent1', color: getDesmosColor('#3EBD93', isDark) });
+                    calc.setExpression({ id: 'point2', color: getDesmosColor('#10B981', isDark) });
+                    calc.setExpression({ id: 'tangent2', color: getDesmosColor('#3EBD93', isDark) });
                 }
             });
         });
