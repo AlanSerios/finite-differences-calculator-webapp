@@ -4,7 +4,9 @@ import numpy as np
 def calculate_finite_differences(func_str, x_val, h_val):
     try:
         x = sp.symbols('x')
-        expr = sp.sympify(func_str, locals={'e': sp.E, 'pi': sp.pi})
+        from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
+        transformations = standard_transformations + (implicit_multiplication_application,)
+        expr = parse_expr(func_str, local_dict={'e': sp.E, 'pi': sp.pi}, transformations=transformations)
         f = sp.lambdify(x, expr, 'numpy')
         
         # 1. ADVANCED FEATURE: Calculate the EXACT analytical derivative

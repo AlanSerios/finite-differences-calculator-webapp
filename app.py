@@ -46,5 +46,25 @@ def api_calculate():
     except Exception as e:
         return jsonify({"success": False, "error": "An error occurred."})
 
+@app.route('/api/preview', methods=['POST'])
+def api_preview():
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "Invalid JSON"})
+        
+    func_str = data.get('function', '').strip()
+    if not func_str:
+        return jsonify({"success": False, "error": "Empty string"})
+        
+    try:
+        import sympy as sp
+        from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
+        transformations = standard_transformations + (implicit_multiplication_application,)
+        func_str = sanitize_function(func_str)
+        expr = parse_expr(func_str, local_dict={'e': sp.E, 'pi': sp.pi}, transformations=transformations)
+        return jsonify({"success": True, "function_latex": sp.latex(expr)})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)
