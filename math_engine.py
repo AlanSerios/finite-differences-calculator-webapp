@@ -12,21 +12,17 @@ def calculate_finite_differences(func_str, x_val, h_val):
         # 1. ADVANCED FEATURE: Calculate the EXACT analytical derivative
         f_prime_expr = sp.diff(expr, x)
         f_prime = sp.lambdify(x, f_prime_expr, 'numpy')
+        exact_diff = float(f_prime(x_val))
         
-        try:
-            exact_diff = float(f_prime(x_val))
-            
-            # Evaluate mathematical steps
-            fx = float(f(x_val))
-            fx_plus_h = float(f(x_val + h_val))
-            fx_minus_h = float(f(x_val - h_val))
-            
-            # Core Calculations
-            forward_diff = (fx_plus_h - fx) / h_val
-            backward_diff = (fx - fx_minus_h) / h_val
-            central_diff = (fx_plus_h - fx_minus_h) / (2 * h_val)
-        except (TypeError, ValueError, ZeroDivisionError, OverflowError) as e:
-            raise ValueError(f"Mathematical domain error at x={x_val}. Function is undefined or complex.")
+        # Evaluate mathematical steps
+        fx = float(f(x_val))
+        fx_plus_h = float(f(x_val + h_val))
+        fx_minus_h = float(f(x_val - h_val))
+        
+        # Core Calculations
+        forward_diff = (fx_plus_h - fx) / h_val
+        backward_diff = (fx - fx_minus_h) / h_val
+        central_diff = (fx_plus_h - fx_minus_h) / (2 * h_val)
         
         # 2. Graph Plotting Data for Desmos
         graph_data = {
