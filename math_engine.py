@@ -24,29 +24,8 @@ def calculate_finite_differences(func_str, x_val, h_val):
         backward_diff = (fx - fx_minus_h) / h_val
         central_diff = (fx_plus_h - fx_minus_h) / (2 * h_val)
         
-        # 2. Graph Plotting Data (Balanced domain to show the whole graph without breaking Y-axis scaling)
-        domain = max(abs(h_val) * 20, 10.0)  # Standard bounds of +/- 10
-        x_coords = np.linspace(float(x_val) - domain, float(x_val) + domain, 500)
-        
-        y_fx = []
-        y_tangent = []
-        y_secant = []
-        
-        for val in x_coords:
-            try:
-                y_fx.append(float(f(float(val))))
-                y_tangent.append(float(exact_diff * (val - x_val) + fx))
-                y_secant.append(float(central_diff * (val - x_val) + fx))
-            except (ValueError, TypeError, ZeroDivisionError, OverflowError):
-                y_fx.append(None)
-                y_tangent.append(None)
-                y_secant.append(None)
-        
+        # 2. Graph Plotting Data for Desmos
         graph_data = {
-            "x_points": [round(float(val), 2) for val in x_coords],
-            "y_fx": [round(float(val), 4) if val is not None else None for val in y_fx],
-            "y_tangent": [round(float(val), 4) if val is not None else None for val in y_tangent],
-            "y_secant": [round(float(val), 4) if val is not None else None for val in y_secant],
             "target_x": round(float(x_val), 2),
             "target_y": round(float(fx), 4)
         }
