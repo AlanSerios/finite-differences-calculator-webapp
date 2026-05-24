@@ -1,16 +1,19 @@
 # Finite Differences Calculator
 
+**Live Application:** [https://finite-differences-calculator-webap.vercel.app/](https://finite-differences-calculator-webap.vercel.app/)
+
 A beautifully designed, mathematically rigorous web application built for calculating **Forward, Backward, and Central Finite Differences**. This project was developed as a comprehensive tool for Numerical Methods, demonstrating step-by-step algorithmic solutions alongside interactive, infinite-resolution graphing.
 
 ## ✨ Core Features
 
 * **Manual Algorithmic Implementation:** Core finite difference algorithms are implemented from scratch in Python, adhering strictly to numerical methods principles.
-* **Infinite-Resolution Graphing:** Integrated with the official **Desmos API** to plot the original function, target points, true tangent lines, and calculated secant lines dynamically with perfect accuracy.
-* **Robust Mathematical Engine:** Powered by SymPy. Features an intelligent parser that understands implicit multiplication (e.g., `2x`, `x(2)`) and gracefully handles mathematical domain errors (e.g., `log(-5)`).
-* **Step-by-Step Solutions:** Generates full formula substitutions, computed data points, and absolute/relative error analysis compared to the exact analytical derivative.
+* **Infinite-Resolution Graphing & Export:** Integrated with the official **Desmos API** to plot the original function, target points, and true/secant lines dynamically with perfect accuracy. Users can instantly export pristine, high-resolution graph screenshots natively.
+* **Robust Mathematical Engine & Error UI:** Powered by SymPy. Features an intelligent parser that handles implicit multiplication and gracefully intercepts mathematical domain errors (e.g., `log(-1)` or dividing by zero) safely, triggering a polished, floating Toast Error UI in the frontend instead of crashing.
+* **Step-by-Step Solutions:** Generates full formula substitutions, computed data points (including One-Step Ahead and One-Step Behind tracking), and absolute/relative error analysis compared to the exact analytical derivative.
 * **MathJax Integration:** Renders all mathematical output in beautiful, standard LaTeX notation dynamically.
-* **Premium UI/UX:** Features a custom dark/light mode toggle, sleek glass-morphic design elements, floating input labels, and fluid CSS animations—built entirely with Tailwind CSS and vanilla Javascript.
-* **Data Export:** Instantly export calculated results to CSV for external analysis.
+* **Premium & Responsive UI/UX:** Features a custom dark/light mode toggle, sleek glass-morphic design elements, and fluid CSS animations—built entirely with Tailwind CSS and vanilla Javascript. Includes a highly optimized mobile layout engineered with editorial typography (eBay Evo design system constraints) for Android and iOS screens.
+* **Supercharged Data Export:** Instantly export calculated results, precise step-by-step formulas, and comprehensive error analysis directly to CSV.
+* **Interactive Creator Testimonial:** Features an integrated, smooth-reveal author badge natively implemented without heavy JavaScript framework bloat.
 
 ## 🛠️ Technology Stack
 
